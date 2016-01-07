@@ -18,25 +18,41 @@ bool Scene::Load_obj_file(std::string filename) {
     int num = shapes.size();
     meshes.reserve(num);
 
-    int dataOffset = 0;
     int indexOffset = 0;
+    int dataOffset = 0;
     for (int i = 0; i < num; ++i) {
+
+        // avoid resizing the buffer too much
+        data.reserve(data.size() + shapes[i].mesh.positions.size()*2);
+
+        auto vertItr = std::begin(shapes[i].mesh.positions);
+        auto normItr = std::begin(shapes[i].mesh.normals);
+
+        auto end = std::end(shapes[i].mesh.positions);
+        // interleave the data in the buffer (VVVNNNVVVNNN)
+        while (vertItr != end) {
+            data.push_back(*vertItr++);
+            data.push_back(*vertItr++);
+            data.push_back(*vertItr++);
+
+            data.push_back(*normItr++);
+            data.push_back(*normItr++);
+            data.push_back(*normItr++);
+        }
+
+        // store mesh info in case we need to draw a single mesh at a time
         meshes.push_back(Mesh {
-            (unsigned int)shapes[i].mesh.positions.size(), // all vertex data is the same size
-            (unsigned int)dataOffset,
             (unsigned int)shapes[i].mesh.indices.size(),
             (unsigned int)indexOffset
         });
 
-        std::copy(std::begin(shapes[i].mesh.positions), std::end(shapes[i].mesh.positions),
-                std::back_inserter(data));
-        std::copy(std::begin(shapes[i].mesh.normals), std::end(shapes[i].mesh.normals),
-                std::back_inserter(data));
-        dataOffset += shapes[i].mesh.positions.size() + shapes[i].mesh.normals.size();
+        for (auto index : shapes[i].mesh.indices) {
+            // make sure indices point to the correct data
+            indices.push_back(index + dataOffset);
+        }
 
-        std::copy(std::begin(shapes[i].mesh.indices), std::end(shapes[i].mesh.indices),
-                std::back_inserter(indices));
-        indexOffset += shapes[i].mesh.indices.size();
+        dataOffset = data.size() / 6;
+        indexOffset = indices.size();
     }
 
     gen_buffers();
@@ -45,11 +61,7 @@ bool Scene::Load_obj_file(std::string filename) {
 }
 
 void Scene::gen_buffers() {
-    int num = meshes.size();
-
-    // use a vao for each mesh
-    VAOs = new GLuint[num];
-    glGenVertexArrays(num, VAOs);
+    glGenVertexArrays(1, &VAO);
 
     buffers = new GLuint[Buffers::AMOUNT];
     glGenBuffers(Buffers::AMOUNT, buffers);
@@ -64,31 +76,32 @@ void Scene::gen_buffers() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint),
         &indices.front(), GL_STATIC_DRAW);
 
-    for (int i = 0; i < num; ++i) {
-        glBindVertexArray(VAOs[i]);
+    glBindVertexArray(VAO);
 
-        // associate the vbos with the currently bounded vao
-        glBindBuffer(GL_ARRAY_BUFFER, buffers[Buffers::vertex]);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[Buffers::index]);
+    // associate the vbos with the currently bounded vao
+    glBindBuffer(GL_ARRAY_BUFFER, buffers[Buffers::vertex]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[Buffers::index]);
 
-        // vertices
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0,
-                (void *)(meshes[i].dataOffset * sizeof(GLfloat)));
+    // vertices
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
 
-        // normals
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0,
-            (void*)((meshes[i].dataOffset + meshes[i].dataCount) * sizeof(GLfloat)));
-    }
+    // normals
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
+        (void*)(3 * sizeof(GLfloat)));
 }
 
 void Scene::Draw() {
-    int count = meshes.size();
-    for (int i = 0; i < count; ++i) {
-        glBindVertexArray(VAOs[i]);
-        glDrawElements(GL_TRIANGLES, meshes[i].indexCount, GL_UNSIGNED_INT,
-                (void*)(meshes[i].indexOffset * sizeof(GLuint)));
-    }
+    //glBindVertexArray(VAO);
+
+    // Draw everything at once
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+
+    /* To draw a single mesh:
+     * glDrawElements(GL_TRIANGLES, meshes[i].indexCount, GL_UNSIGNED_INT,
+     *       (void*)(meshes[i].indexOffset * sizeof(GLuint)));
+     */
+
 }
 

@@ -11,14 +11,12 @@
 
 class Scene {
     typedef struct {
-        unsigned int dataCount;
-        unsigned int dataOffset;
         unsigned int indexCount;
         unsigned int indexOffset;
     } Mesh;
 
     enum Buffers {
-        vertex, normal, index, AMOUNT
+        vertex, index, AMOUNT
     };
 
     public:
@@ -34,5 +32,5 @@ class Scene {
         std::vector<GLfloat> data;
         std::vector<GLuint> indices;
 
-        GLuint* VAOs, *buffers;
+        GLuint VAO, *buffers;
 };
