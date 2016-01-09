@@ -34,14 +34,16 @@ void Camera::Set_render_size(int width, int height) {
 
 void Camera::Move(glm::vec3 direction) {
     // convert local space to world space
-    // ignore vertical movement for now
+    // ignore technical vertical movement for now
     position.x -= sin(rotation.y) * direction.x + cos(rotation.y) * direction.z;
     position.y += sin(rotation.x) * direction.x;
     position.z += cos(rotation.y) * direction.x - sin(rotation.y) * direction.z;
 }
 
 void Camera::Rotate(glm::vec3 direction) {
+    static constexpr float halfPi = 1.57079632679;
     rotation += direction;
+    rotation.x = glm::clamp(rotation.x, -halfPi, halfPi);
 }
 
 void Camera::Set_fov(float newFOV) {
