@@ -1,13 +1,16 @@
 #include "scene.h"
 #include "the_shader_manager.h"
+#include "the_render_manager.h"
 #include "camera.h"
 #include "controller.h"
 
-#include <iostream>
-#include <fstream>
-
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
+#include <glm/gtc/type_ptr.hpp>
+
+#include <iostream>
+#include <fstream>
 
 int
 main(int argc, char* argv[]) {
@@ -91,7 +94,8 @@ main(int argc, char* argv[]) {
         controller.Update_view(deltaTime);
 
         // should this be done somewhere else?
-        TheShaderManager::Instance()->Set_uniform("MVP", camera.mvp);
+        TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
+                "MVP", glm::value_ptr(camera.mvp));
 
         scene.Draw();
 
@@ -103,8 +107,8 @@ main(int argc, char* argv[]) {
         if (testWidth != winWidth || testHeight != winHeight) {
             winWidth = testWidth;
             winHeight = testHeight;
-            camera.Set_render_size(winWidth, winHeight);
-            glViewport(0, 0, winWidth, winHeight);
+            TheRenderManager::Instance()->Set_render_size(winWidth, winHeight);
+            camera.Set_aspect((float)winWidth/winHeight);
         }
 
     } while(!glfwWindowShouldClose(window));

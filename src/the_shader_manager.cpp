@@ -13,6 +13,11 @@ std::vector<std::map<int, std::string> > shaderDefs = {
     {
         {GL_VERTEX_SHADER, "basic.vert.glsl"},
         {GL_FRAGMENT_SHADER, "basic.frag.glsl"}
+    },
+    {
+        {GL_VERTEX_SHADER, "voxelize.vert.glsl"},
+        {GL_GEOMETRY_SHADER, "voxelize.geom.glsl"},
+        {GL_FRAGMENT_SHADER, "voxelize.frag.glsl"}
     }
 };
 
@@ -65,6 +70,14 @@ void TheShaderManager::Use(Shaders::ShaderType type) {
 }
 
 
-void TheShaderManager::Set_uniform(std::string name, glm::mat4 data) {
-    shaders[current]->Set_uniformm4fv(name.c_str(), data);
+void TheShaderManager::Set_uniform(Uniform type, std::string name, void* data) {
+    GLuint location = glGetUniformLocation(shaders[current]->Get_ID(), name.c_str());
+    switch (type) {
+        case Uniform::mat4:
+            glUniformMatrix4fv(location, 1, GL_FALSE, (float*)data);
+            break;
+        case Uniform::i1:
+            glUniform1i(location, *((int*)data));
+            break;
+    }
 }

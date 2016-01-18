@@ -11,25 +11,23 @@ void Camera::Setup() {
     rotation = glm::vec3(0,0,0);
     renderNear = 0.1f;
     renderFar = 100.0f;
-    renderWidth = 512;
-    renderHeight = 512;
+    aspect = 1.0f;
     fov = 90.0f;
 
-    projection = glm::perspective(glm::radians(fov), float(renderWidth)/float(renderHeight), renderNear, renderFar);
+    projection = glm::perspective(glm::radians(fov), aspect, renderNear, renderFar);
 }
 
 void Camera::Set_render_distance(float near, float far) {
     renderNear = near;
     renderFar = far;
 
-    projection = glm::perspective(glm::radians(fov), float(renderWidth)/float(renderHeight), renderNear, renderFar);
+    projection = glm::perspective(glm::radians(fov), aspect, renderNear, renderFar);
 }
 
-void Camera::Set_render_size(int width, int height) {
-    renderWidth = width;
-    renderHeight = height;
+void Camera::Set_aspect(float asp) {
+    aspect = asp;
 
-    projection = glm::perspective(glm::radians(fov), float(renderWidth)/float(renderHeight), renderNear, renderFar);
+    projection = glm::perspective(glm::radians(fov), aspect, renderNear, renderFar);
 }
 
 void Camera::Move(glm::vec3 direction) {
@@ -48,7 +46,7 @@ void Camera::Rotate(glm::vec3 direction) {
 
 void Camera::Set_fov(float newFOV) {
     fov = newFOV;
-    projection = glm::perspective(glm::radians(fov), float(renderWidth)/float(renderHeight), renderNear, renderFar);
+    projection = glm::perspective(glm::radians(fov), aspect, renderNear, renderFar);
 }
 
 void Camera::Update_view() {

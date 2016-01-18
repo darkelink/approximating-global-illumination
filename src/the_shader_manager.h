@@ -10,10 +10,14 @@
 namespace Shaders {
     enum ShaderType : int {
         basic,
+        voxelize,
         AMOUNT
     };
-
 }
+
+enum class Uniform {
+    mat4, i1
+};
 
 class TheShaderManager {
     public:
@@ -23,7 +27,7 @@ class TheShaderManager {
         void Reload(Shaders::ShaderType type);
         void Use(Shaders::ShaderType type);
 
-        void Set_uniform(std::string, glm::mat4 data);
+        void Set_uniform(Uniform type, std::string name, void* data);
 
     private:
         TheShaderManager(){};

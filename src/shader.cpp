@@ -20,10 +20,11 @@ bool Shader::Load(std::string source, GLenum type) {
         std::vector<GLchar> errorLog(errorLength);
         glGetShaderInfoLog(shaderid, errorLength, &errorLength, &errorLog[0]);
 
-        std::cerr << "Compile error: ";
+        std::cerr << std::endl << "Compile error: ";
         for (auto i: errorLog) {
             std::cerr << i;
         }
+        std::cerr << std::endl;
 
         glDeleteShader(shaderid);
         return false;
@@ -75,7 +76,6 @@ bool Shader::Link() {
 }
 
 void Shader::Use() {
-
     glUseProgram(programid);
 }
 
@@ -83,22 +83,6 @@ void Shader::Delete() {
     glDeleteProgram(programid);
 }
 
-void Shader::Set_uniformm4fv(const GLchar* uniform, glm::mat4 matrix) {
-    GLuint matrixID = glGetUniformLocation(programid, uniform);
-    glUniformMatrix4fv(matrixID, 1, GL_FALSE, glm::value_ptr(matrix));
-}
-
-void Shader::Set_uniform1f(const GLchar* uniform, GLfloat value) {
-    GLuint valueID = glGetUniformLocation(programid, uniform);
-    glUniform1f(valueID, value);
-}
-
-void Shader::Set_uniform4f(const GLchar* uniform, glm::vec4 value) {
-    GLuint valueID = glGetUniformLocation(programid, uniform);
-    glUniform4fv(valueID, 1, glm::value_ptr(value));
-}
-
-void Shader::Set_uniform1i(const GLchar* uniform, GLint value) {
-    GLuint valueID = glGetUniformLocation(programid, uniform);
-    glUniform1i(valueID, value);
+GLuint Shader::Get_ID() {
+    return programid;
 }

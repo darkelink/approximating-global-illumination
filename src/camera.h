@@ -15,7 +15,7 @@ class Camera {
 
         void Use();
         void Set_render_distance(float near, float far);
-        void Set_render_size(int width, int height);
+        void Set_aspect(float asp);
 
         // move and rotate in local space
         void Move(glm::vec3 direction);
@@ -35,7 +35,7 @@ class Camera {
 
         float fov;
         float renderNear, renderFar;
-        int renderWidth, renderHeight;
+        float aspect;
 
         glm::mat4 projection;
 };
