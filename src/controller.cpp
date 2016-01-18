@@ -3,6 +3,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <iostream>
 #include <vector>
 
 constexpr float Controller::speed;
@@ -22,9 +23,17 @@ void Controller::Get_input() {
     if (glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(win, GL_TRUE);
     }
-    if (glfwGetKey(win, GLFW_KEY_ENTER) == GLFW_PRESS) {
-        TheShaderManager::Instance()->Reload(Shaders::basic);
-        TheShaderManager::Instance()->Use(Shaders::basic);
+
+    // ensure reloading only happens once per key press
+    static bool isPressed = false;
+    if (glfwGetKey(win, GLFW_KEY_ENTER) == GLFW_PRESS && !isPressed) {
+        std::cout << "Reloading shaders... ";
+        TheShaderManager::Instance()->Load_all();
+        std::cout << "done" << std::endl;
+        isPressed = true;
+    }
+    if (isPressed && glfwGetKey(win, GLFW_KEY_ENTER) == GLFW_RELEASE) {
+        isPressed = false;
     }
 
     // movement

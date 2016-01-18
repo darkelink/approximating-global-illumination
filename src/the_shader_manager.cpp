@@ -49,9 +49,9 @@ void TheShaderManager::Load_all() {
 
 void TheShaderManager::Reload(Shaders::ShaderType type) {
     // remove old shader
-    if (shaders[type]->Ready) {
-        shaders[type]->Delete();
-    }
+    //if (shaders[type]->Ready) {
+    //    shaders[type]->Delete();
+    //}
 
     Shader* s = new Shader();
 

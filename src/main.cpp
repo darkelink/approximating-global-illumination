@@ -1,13 +1,10 @@
 #include "scene.h"
-#include "the_shader_manager.h"
 #include "the_render_manager.h"
 #include "camera.h"
 #include "controller.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
-#include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -55,13 +52,13 @@ main(int argc, char* argv[]) {
 
 
     std::cout << "Loading shaders... ";
-    TheShaderManager::Instance()->Load_all();
-    TheShaderManager::Instance()->Use(Shaders::basic);
+    TheRenderManager::Instance()->Init();
     std::cout << "done" << std::endl;
 
     std::cout << "Loading scene... ";
     Scene scene;
     scene.Load_obj_file(argv[1]);
+    TheRenderManager::Instance()->Set_scene(scene);
     std::cout << "done" << std::endl;
 
 
@@ -84,8 +81,6 @@ main(int argc, char* argv[]) {
 
     std::cout << "Entering main loop" << std::endl;
     do {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         currentTime = glfwGetTime();
         deltaTime = float(currentTime - lastTime);
         lastTime = currentTime;
@@ -93,11 +88,7 @@ main(int argc, char* argv[]) {
         controller.Get_input();
         controller.Update_view(deltaTime);
 
-        // should this be done somewhere else?
-        TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
-                "MVP", glm::value_ptr(camera.mvp));
-
-        scene.Draw();
+        TheRenderManager::Instance()->Render(&camera);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

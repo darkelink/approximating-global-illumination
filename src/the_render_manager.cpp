@@ -2,8 +2,12 @@
 
 #include "the_shader_manager.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include <GL/glew.h>
 #include <GL/gl.h>
+
+#include <iostream>
 
 TheRenderManager* TheRenderManager::instance = 0;
 
@@ -12,6 +16,10 @@ TheRenderManager* TheRenderManager::Instance() {
         instance = new TheRenderManager;
     }
     return instance;
+}
+
+void TheRenderManager::Init() {
+    TheShaderManager::Instance()->Load_all();
 }
 
 void TheRenderManager::Set_scene(Scene scene) {
@@ -43,8 +51,13 @@ void TheRenderManager::Voxelize(int size) {
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
-void TheRenderManager::Render() {
+void TheRenderManager::Render(Camera* camera) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    TheShaderManager::Instance()->Use(Shaders::basic);
+    TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
+            "MVP", glm::value_ptr(camera->mvp));
+
     currentScene.Draw();
 }
 
