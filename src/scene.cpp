@@ -1,13 +1,22 @@
 #define TINYOBJLOADER_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
 #include "scene.h"
 
+#include "stb_image.h"
+
+#include <algorithm>
 #include <iostream>
+#include <map>
+
+static inline bool file_exists(std::string filename) {
+    std::ifstream infile(filename.c_str());
+    return infile.good();
+}
 
 bool Scene::Load_obj_file(std::string filename) {
     std::string err;
 
     std::vector<tinyobj::shape_t> shapes;
-    // TODO: materials
     std::vector<tinyobj::material_t> materials;
 
     bool ret = tinyobj::LoadObj(shapes, materials, err, filename.c_str(), "res/models/");
@@ -15,21 +24,26 @@ bool Scene::Load_obj_file(std::string filename) {
         std::cerr << err << std::endl;
     }
 
+    std::map<std::string, uint64_t> textures;
+
     int num = shapes.size();
     meshes.reserve(num);
 
     int indexOffset = 0;
     int dataOffset = 0;
+
     for (int i = 0; i < num; ++i) {
 
         // avoid resizing the buffer too much
-        data.reserve(data.size() + shapes[i].mesh.positions.size()*2);
+        data.reserve(data.size() +
+                shapes[i].mesh.positions.size()*2 + shapes[i].mesh.texcoords.size());
 
         auto vertItr = std::begin(shapes[i].mesh.positions);
         auto normItr = std::begin(shapes[i].mesh.normals);
+        auto texItr  = std::begin(shapes[i].mesh.texcoords);
 
         auto end = std::end(shapes[i].mesh.positions);
-        // interleave the data in the buffer (VVVNNNVVVNNN)
+        // interleave vertex data in the buffer
         while (vertItr != end) {
             data.push_back(*vertItr++);
             data.push_back(*vertItr++);
@@ -38,26 +52,84 @@ bool Scene::Load_obj_file(std::string filename) {
             data.push_back(*normItr++);
             data.push_back(*normItr++);
             data.push_back(*normItr++);
+
+            data.push_back(*texItr++);
+            data.push_back(*texItr++);
+        }
+
+
+        uint64_t mat;
+
+
+        auto matID = materials[shapes[i].mesh.material_ids[0]];
+        std::string filename = "res/models/" + matID.diffuse_texname;
+        // mtl assumes windows directory separators
+        std::replace(filename.begin(), filename.end(), '\\', '/');
+
+        auto exists = textures.find(filename);
+
+        if (exists == textures.end()) {
+            if (file_exists(filename)) {
+                mat = upload_texture(filename);
+            } else {
+                if (!matID.diffuse_texname.empty()) {
+                    std::cerr << "Couldn't open texture: " << filename << std::endl;
+                }
+                mat = upload_texture("res/models/textures/missing.tga");
+            }
+            std::pair<std::string, uint64_t> newTex(filename, mat);
+            textures.insert(newTex);
+        } else {
+            mat = exists->second;
         }
 
         // store mesh info in case we need to draw a single mesh at a time
         meshes.push_back(Mesh {
-            (unsigned int)shapes[i].mesh.indices.size(),
-            (unsigned int)indexOffset
-        });
+                (unsigned int)shapes[i].mesh.indices.size(),
+                (unsigned int)indexOffset,
+                });
+
+        auto texmesh = texturedMeshes.find(mat);
+        if (texmesh == texturedMeshes.end()) {
+            texturedMeshes.insert(std::make_pair(mat, std::vector<Mesh*>{&meshes.back()}));
+        } else {
+            texmesh->second.push_back(&meshes.back());
+        }
 
         for (auto index : shapes[i].mesh.indices) {
             // make sure indices point to the correct data
             indices.push_back(index + dataOffset);
         }
 
-        dataOffset = data.size() / 6;
+        dataOffset = data.size() / dataElements;
         indexOffset = indices.size();
     }
 
     gen_buffers();
 
     return ret;
+}
+
+uint64_t Scene::upload_texture(std::string filename) {
+
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    glActiveTexture(GL_TEXTURE0);
+
+    unsigned char* image;
+    int width, height, components;
+    image = stbi_load(filename.c_str(), &width, &height, &components, 0);
+
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, width, height);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);
+
+    uint64_t handle = glGetTextureHandleARB(textureID);
+    glMakeTextureHandleResidentARB(handle);
+
+    stbi_image_free(image);
+
+    return handle;
 }
 
 void Scene::gen_buffers() {
@@ -74,7 +146,7 @@ void Scene::gen_buffers() {
     // indices
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[Buffers::index]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint),
-        &indices.front(), GL_STATIC_DRAW);
+            &indices.front(), GL_STATIC_DRAW);
 
     glBindVertexArray(VAO);
 
@@ -84,24 +156,32 @@ void Scene::gen_buffers() {
 
     // vertices
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, dataElements * sizeof(GLfloat),
+            nullptr);
 
     // normals
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
-        (void*)(3 * sizeof(GLfloat)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, dataElements * sizeof(GLfloat),
+            (void*)(3 * sizeof(GLfloat)));
+
+    // texture coords
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, dataElements * sizeof(GLfloat),
+            (void*)(6 * sizeof(GLfloat)));
 }
 
 void Scene::Draw() {
     //glBindVertexArray(VAO);
 
     // Draw everything at once
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+    // glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 
-    /* To draw a single mesh:
-     * glDrawElements(GL_TRIANGLES, meshes[i].indexCount, GL_UNSIGNED_INT,
-     *       (void*)(meshes[i].indexOffset * sizeof(GLuint)));
-     */
-
+    for (auto texMesh : texturedMeshes) {
+        glUniformHandleui64ARB(3, texMesh.first);
+        for (auto mesh : texMesh.second) {
+            glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT,
+                    (void*)(mesh->indexOffset * sizeof(GLuint)));
+        }
+    }
 }
 

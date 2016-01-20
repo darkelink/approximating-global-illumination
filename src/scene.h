@@ -26,11 +26,15 @@ class Scene {
 
     private:
         void gen_buffers();
+        uint64_t upload_texture(std::string filename);
 
         std::vector<Mesh> meshes;
+        std::map<uint64_t, std::vector<Mesh*>> texturedMeshes;
         // put static data into a single continuous buffer
         std::vector<GLfloat> data;
         std::vector<GLuint> indices;
 
-        GLuint VAO, *buffers;
+        GLuint VAO, * buffers;
+
+        const static int dataElements = 8;
 };

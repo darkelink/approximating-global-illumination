@@ -9,8 +9,8 @@ void Camera::Setup() {
     // load some default values
     position = glm::vec3(0,0,0);
     rotation = glm::vec3(0,0,0);
-    renderNear = 0.1f;
-    renderFar = 100.0f;
+    renderNear = 10.0f;
+    renderFar = 5000.0f;
     aspect = 1.0f;
     fov = 90.0f;
 

@@ -55,6 +55,10 @@ void Controller::Get_input() {
 
     glm::normalize(move);
 
+    if (glfwGetKey(win, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        move *= 5;
+    }
+
     // rotation
     //
     double xpos, ypos;
