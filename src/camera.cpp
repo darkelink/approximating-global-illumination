@@ -50,13 +50,11 @@ void Camera::Set_fov(float newFOV) {
 }
 
 void Camera::Update_view() {
-    mvp = projection;
+    view = glm::mat4();
 
     // probably a faster way to do this
-    mvp = glm::rotate(mvp, rotation.x, glm::vec3(1,0,0));
-    mvp = glm::rotate(mvp, rotation.y, glm::vec3(0,1,0));
-    mvp = glm::rotate(mvp, rotation.z, glm::vec3(0,0,1));
-    mvp = glm::translate(mvp, position);
-
-    // forget about model, 2/3 ain't bad
+    view = glm::rotate(view, rotation.x, glm::vec3(1,0,0));
+    view = glm::rotate(view, rotation.y, glm::vec3(0,1,0));
+    view = glm::rotate(view, rotation.z, glm::vec3(0,0,1));
+    view = glm::translate(view, position);
 }

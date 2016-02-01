@@ -16,7 +16,11 @@ class Scene {
     } Mesh;
 
     enum Buffers {
-        vertex, index, AMOUNT
+        vertex, texture, index, AMOUNT
+    };
+
+    enum VertexAttrib {
+        location, normal, texcoord
     };
 
     public:
@@ -33,6 +37,7 @@ class Scene {
         // put static data into a single continuous buffer
         std::vector<GLfloat> data;
         std::vector<GLuint> indices;
+        std::vector<GLubyte> texID;
 
         GLuint VAO, * buffers;
 

@@ -56,7 +56,9 @@ void TheRenderManager::Render(Camera* camera) {
 
     TheShaderManager::Instance()->Use(Shaders::basic);
     TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
-            "MVP", glm::value_ptr(camera->mvp));
+            "view", glm::value_ptr(camera->view));
+    TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
+            "projection", glm::value_ptr(camera->projection));
 
     currentScene.Draw();
 }

@@ -11,12 +11,11 @@
 
 int
 main(int argc, char* argv[]) {
-    std::cout << "Loading GLFW... ";
+    std::cout << "Loading GLFW..." << std::endl;
     if (!glfwInit()) {
         std::cerr << "ERROR: could not start GLFW" << std::endl;
         return 1;
     }
-    std::cout << "done" << std::endl;
 
     int winWidth = 1280;
     int winHeight = 720;
@@ -33,12 +32,11 @@ main(int argc, char* argv[]) {
     glewExperimental = GL_TRUE;
     glfwSwapInterval(0);
 
-    std::cout << "Loading GLEW... ";
+    std::cout << "Loading GLEW..." << std::endl;
     if (glewInit() != GLEW_OK) {
         std::cerr << "ERROR: could not start GLEW" << std::endl;
         return 3;
     }
-    std::cout << "done" << std::endl;
 
     const GLubyte* renderer = glGetString(GL_RENDERER);
     const GLubyte* version  = glGetString(GL_VERSION);
@@ -51,15 +49,13 @@ main(int argc, char* argv[]) {
     glfwPollEvents();
 
 
-    std::cout << "Loading shaders... ";
+    std::cout << "Loading shaders..." << std::endl;
     TheRenderManager::Instance()->Init();
-    std::cout << "done" << std::endl;
 
-    std::cout << "Loading scene... ";
+    std::cout << "Loading scene..." << std::endl;;
     Scene scene;
     scene.Load_obj_file(argv[1]);
     TheRenderManager::Instance()->Set_scene(scene);
-    std::cout << "done" << std::endl;
 
 
     Camera camera;

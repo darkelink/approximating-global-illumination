@@ -26,7 +26,8 @@ class Camera {
         // only need to update mvp once per frame
         void Update_view();
 
-        glm::mat4 mvp;
+        glm::mat4 view;
+        glm::mat4 projection;
 
     private:
 
@@ -36,6 +37,4 @@ class Camera {
         float fov;
         float renderNear, renderFar;
         float aspect;
-
-        glm::mat4 projection;
 };

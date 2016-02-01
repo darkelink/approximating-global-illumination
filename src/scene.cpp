@@ -63,19 +63,19 @@ bool Scene::Load_obj_file(std::string filename) {
 
         auto matID = materials[shapes[i].mesh.material_ids[0]];
         std::string filename = "res/models/" + matID.diffuse_texname;
-        // mtl assumes windows directory separators
+        // mtl uses backslashes as directory separators for some reason
         std::replace(filename.begin(), filename.end(), '\\', '/');
 
         auto exists = textures.find(filename);
 
         if (exists == textures.end()) {
-            if (file_exists(filename)) {
-                mat = upload_texture(filename);
-            } else {
-                if (!matID.diffuse_texname.empty()) {
-                    std::cerr << "Couldn't open texture: " << filename << std::endl;
-                }
+            if (matID.diffuse_texname.empty()) {
                 mat = upload_texture("res/models/textures/missing.tga");
+            } else if (!file_exists(filename)) {
+                std::cerr << "Couldn't open texture: " << filename << std::endl;
+                mat = upload_texture("res/models/textures/missing.tga");
+            } else {
+                mat = upload_texture(filename);
             }
             std::pair<std::string, uint64_t> newTex(filename, mat);
             textures.insert(newTex);
@@ -121,8 +121,15 @@ uint64_t Scene::upload_texture(std::string filename) {
     image = stbi_load(filename.c_str(), &width, &height, &components, 0);
 
     glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, width, height);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);
+    if (components == 3) {
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, width, height);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);
+    } else if (components == 4) {
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width, height);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, image);
+    } else {
+        std::cerr << "bad texture format:" << filename << std::endl;
+    }
 
     uint64_t handle = glGetTextureHandleARB(textureID);
     glMakeTextureHandleResidentARB(handle);
@@ -154,20 +161,17 @@ void Scene::gen_buffers() {
     glBindBuffer(GL_ARRAY_BUFFER, buffers[Buffers::vertex]);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[Buffers::index]);
 
-    // vertices
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, dataElements * sizeof(GLfloat),
-            nullptr);
+    glEnableVertexAttribArray(VertexAttrib::location);
+    glVertexAttribPointer(VertexAttrib::location, 3, GL_FLOAT, GL_FALSE,
+            dataElements * sizeof(GLfloat), nullptr);
 
-    // normals
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, dataElements * sizeof(GLfloat),
-            (void*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(VertexAttrib::normal);
+    glVertexAttribPointer(VertexAttrib::normal, 3, GL_FLOAT, GL_FALSE,
+            dataElements * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 
-    // texture coords
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, dataElements * sizeof(GLfloat),
-            (void*)(6 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(VertexAttrib::texcoord);
+    glVertexAttribPointer(VertexAttrib::texcoord, 2, GL_FLOAT, GL_FALSE,
+            dataElements * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
 }
 
 void Scene::Draw() {

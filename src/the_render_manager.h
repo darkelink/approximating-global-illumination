@@ -24,4 +24,5 @@ class TheRenderManager {
 
         Scene currentScene;
         int renderWidth, renderHeight;
+        GLuint voxelCount;
 };
