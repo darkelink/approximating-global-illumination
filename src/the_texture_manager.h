@@ -20,7 +20,7 @@ class TheTextureManager {
     public:
         static TheTextureManager* Instance();
 
-        GLuint Create_empty(int width, int height);
+        uint64_t Create_empty(std::vector<int> dimentions, GLenum format);
         uint64_t Create_from_file(std::string filename);
 
         void Delete(uint64_t handle);
@@ -44,6 +44,9 @@ class TheTextureManager {
         std::vector<uint64_t> gBufferTextures;
         std::vector<GLuint> gBuffer;
         GLuint depth;
+
+        // use a buffer for 1D textures
+        GLuint texBuffer;
 
         uint64_t make_bindless(GLuint textureID);
 };

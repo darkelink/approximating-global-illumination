@@ -51,10 +51,22 @@ void TheRenderManager::Voxelize(int resolution) {
     glDisable(GL_DEPTH_TEST);
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
+    // need to count voxels to determine buffer size
+    TheShaderManager::Instance()->Use(Shaders::voxelcount);
+    TheShaderManager::Instance()->Set_uniform(Uniform::i1, "gridSize", &resolution);
+
+    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, voxelCount);
+
+    currentScene.Draw();
+
+
     TheShaderManager::Instance()->Use(Shaders::voxelize);
     TheShaderManager::Instance()->Set_uniform(Uniform::i1, "gridSize", &resolution);
 
+    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, voxelCount);
+
     currentScene.Draw();
+
 
     glViewport(0, 0, renderWidth, renderHeight);
     glEnable(GL_CULL_FACE);
@@ -129,4 +141,20 @@ void TheRenderManager::Use_defered() {
     }
 
     defered = true;
+}
+
+void TheRenderManager::Init_voxelization() {
+    const int zero = 0;
+
+    glGenBuffers(1, &voxelCount);
+    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, voxelCount);
+    glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), &zero, GL_STATIC_DRAW);
+
+    // count voxels
+
+    int count = *(GLuint*)glMapBuffer(GL_ATOMIC_COUNTER_BUFFER, GL_MAP_READ_BIT);
+
+    voxels.push_back(TheTextureManager::Instance()->Create_empty({count}, GL_R32UI));
+    voxels.push_back(TheTextureManager::Instance()->Create_empty({count}, GL_RGBA8));
+    voxels.push_back(TheTextureManager::Instance()->Create_empty({count}, GL_RGBA16F));
 }

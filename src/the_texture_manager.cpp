@@ -32,23 +32,34 @@ uint64_t TheTextureManager::make_bindless(GLuint textureID) {
     return handle;
 }
 
-GLuint TheTextureManager::Create_empty(int width, int height) {
+uint64_t TheTextureManager::Create_empty(std::vector<int> dimentions, GLenum format) {
     GLuint textureID;
     glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_2D, textureID);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    switch (dimentions.size()) {
+        case 1:
+            if (texBuffer <= 0) {
+                glGenBuffers(1, &texBuffer);
+                glBindBuffer(GL_TEXTURE_BUFFER, texBuffer);
+                // assume all 1D data is the same size
+                glBufferData(GL_TEXTURE_BUFFER, dimentions[0], 0, GL_STATIC_DRAW);
+            }
+            glBindTexture(GL_TEXTURE_BUFFER, textureID);
+            glTexBuffer(GL_TEXTURE_BUFFER, format, texBuffer);
+        case 2:
+            glBindTexture(GL_TEXTURE_2D, textureID);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-            GL_UNSIGNED_BYTE, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    /*
-     *uint64_t handle = make_bindless(textureID);
-     */
-    return textureID;
+            glTexImage2D(GL_TEXTURE_2D, 0, format, dimentions[0], dimentions[1], 0,
+                    format, GL_UNSIGNED_BYTE, NULL);
+            break;
+    }
+
+    return make_bindless(textureID);
 }
 
 uint64_t TheTextureManager::Create_from_file(std::string filename) {
@@ -61,6 +72,7 @@ uint64_t TheTextureManager::Create_from_file(std::string filename) {
         // texture already exists
         return exists->second;
     }
+    std::cout << filename << std::endl;
 
     GLuint textureID;
     glGenTextures(1, &textureID);
@@ -102,8 +114,8 @@ GLuint TheTextureManager::Create_framebuffer(int width, int height) {
     gBuffer.reserve(GBuffer::AMOUNT);
     gBufferTextures.reserve(GBuffer::AMOUNT);
     for (int i = 0; i < GBuffer::AMOUNT; ++i) {
-        gBuffer.push_back(Create_empty(width, height));
-        gBufferTextures.push_back(make_bindless(gBuffer[i]));
+        gBufferTextures.push_back(Create_empty({width, height}, GL_RGB));
+        gBuffer.push_back(textures[gBufferTextures[i]]);
     }
 
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,

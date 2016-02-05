@@ -4,6 +4,10 @@
 #include "scene.h"
 
 class TheRenderManager {
+    enum Voxels {
+        postition, color, normal, AMOUNT
+    };
+
     public:
         static TheRenderManager* Instance();
 
@@ -17,6 +21,7 @@ class TheRenderManager {
         void Render_framebuffer();
 
         void Use_defered();
+        void Init_voxelization();
 
     private:
         TheRenderManager(){};
@@ -30,6 +35,7 @@ class TheRenderManager {
         Scene currentScene;
         int renderWidth, renderHeight;
         GLuint voxelCount;
+        std::vector<uint64_t> voxels;
 
         GLuint framebuffer, quadVA, quadbuffer;
 
