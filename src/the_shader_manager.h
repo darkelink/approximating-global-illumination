@@ -9,8 +9,10 @@
 
 namespace Shaders {
     enum ShaderType : int {
-        basic,
+        shaded,
         voxelize,
+        defered,
+        screen,
         AMOUNT
     };
 }

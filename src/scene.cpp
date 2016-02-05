@@ -1,17 +1,11 @@
 #define TINYOBJLOADER_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
 #include "scene.h"
 
-#include "stb_image.h"
+#include "the_texture_manager.h"
 
 #include <algorithm>
 #include <iostream>
 #include <map>
-
-static inline bool file_exists(std::string filename) {
-    std::ifstream infile(filename.c_str());
-    return infile.good();
-}
 
 bool Scene::Load_obj_file(std::string filename) {
     std::string err;
@@ -24,7 +18,6 @@ bool Scene::Load_obj_file(std::string filename) {
         std::cerr << err << std::endl;
     }
 
-    std::map<std::string, uint64_t> textures;
 
     int num = shapes.size();
     meshes.reserve(num);
@@ -57,38 +50,25 @@ bool Scene::Load_obj_file(std::string filename) {
             data.push_back(*texItr++);
         }
 
-
-        uint64_t mat;
-
-
-        auto matID = materials[shapes[i].mesh.material_ids[0]];
-        std::string filename = "res/models/" + matID.diffuse_texname;
-        // mtl uses backslashes as directory separators for some reason
-        std::replace(filename.begin(), filename.end(), '\\', '/');
-
-        auto exists = textures.find(filename);
-
-        if (exists == textures.end()) {
-            if (matID.diffuse_texname.empty()) {
-                mat = upload_texture("res/models/textures/missing.tga");
-            } else if (!file_exists(filename)) {
-                std::cerr << "Couldn't open texture: " << filename << std::endl;
-                mat = upload_texture("res/models/textures/missing.tga");
-            } else {
-                mat = upload_texture(filename);
-            }
-            std::pair<std::string, uint64_t> newTex(filename, mat);
-            textures.insert(newTex);
-        } else {
-            mat = exists->second;
-        }
-
-        // store mesh info in case we need to draw a single mesh at a time
         meshes.push_back(Mesh {
                 (unsigned int)shapes[i].mesh.indices.size(),
                 (unsigned int)indexOffset,
                 });
 
+
+        auto matID = materials[shapes[i].mesh.material_ids[0]];
+        std::string filename;
+        if (matID.diffuse_texname.empty()) {
+            filename = "";
+        } else {
+            filename = "res/models/" + matID.diffuse_texname;
+            std::replace(filename.begin(), filename.end(), '\\', '/');
+        }
+        // mtl uses backslashes as directory separators for some reason
+
+        uint64_t mat = TheTextureManager::Instance()->Create_from_file(filename);
+
+        // group meshes with the same texture
         auto texmesh = texturedMeshes.find(mat);
         if (texmesh == texturedMeshes.end()) {
             texturedMeshes.insert(std::make_pair(mat, std::vector<Mesh*>{&meshes.back()}));
@@ -108,35 +88,6 @@ bool Scene::Load_obj_file(std::string filename) {
     gen_buffers();
 
     return ret;
-}
-
-uint64_t Scene::upload_texture(std::string filename) {
-
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-    glActiveTexture(GL_TEXTURE0);
-
-    unsigned char* image;
-    int width, height, components;
-    image = stbi_load(filename.c_str(), &width, &height, &components, 0);
-
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    if (components == 3) {
-        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, width, height);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);
-    } else if (components == 4) {
-        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width, height);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, image);
-    } else {
-        std::cerr << "bad texture format:" << filename << std::endl;
-    }
-
-    uint64_t handle = glGetTextureHandleARB(textureID);
-    glMakeTextureHandleResidentARB(handle);
-
-    stbi_image_free(image);
-
-    return handle;
 }
 
 void Scene::gen_buffers() {
@@ -175,13 +126,13 @@ void Scene::gen_buffers() {
 }
 
 void Scene::Draw() {
-    //glBindVertexArray(VAO);
+    glBindVertexArray(VAO);
 
     // Draw everything at once
     // glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 
     for (auto texMesh : texturedMeshes) {
-        glUniformHandleui64ARB(3, texMesh.first);
+        glUniformHandleui64ARB(0, texMesh.first);
         for (auto mesh : texMesh.second) {
             glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT,
                     (void*)(mesh->indexOffset * sizeof(GLuint)));

@@ -27,9 +27,10 @@ class Camera {
         void Update_view();
 
         glm::mat4 view;
-        glm::mat4 projection;
+        glm::mat4 mvp;
 
     private:
+        glm::mat4 projection;
 
         glm::vec3 position;
         glm::vec3 rotation; // pitch, yaw, roll

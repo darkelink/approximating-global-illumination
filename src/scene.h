@@ -30,7 +30,6 @@ class Scene {
 
     private:
         void gen_buffers();
-        uint64_t upload_texture(std::string filename);
 
         std::vector<Mesh> meshes;
         std::map<uint64_t, std::vector<Mesh*>> texturedMeshes;

@@ -20,7 +20,7 @@ bool Shader::Load(std::string source, GLenum type) {
         std::vector<GLchar> errorLog(errorLength);
         glGetShaderInfoLog(shaderid, errorLength, &errorLength, &errorLog[0]);
 
-        std::cerr << std::endl << "Compile error: ";
+        std::cerr << std::endl << "Compile errors: " << std::endl;
         for (auto i: errorLog) {
             std::cerr << i;
         }
@@ -51,7 +51,7 @@ bool Shader::Link() {
         std::vector<GLchar> infoLog(maxLength);
         glGetProgramInfoLog(programid, maxLength, &maxLength, &infoLog[0]);
 
-        std::cerr << "Linking error: ";
+        std::cerr << "Linking errors: " << std::endl;
         for (auto i: infoLog) {
             std::cerr << i;
         }

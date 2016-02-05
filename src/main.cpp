@@ -50,7 +50,9 @@ main(int argc, char* argv[]) {
 
 
     std::cout << "Loading shaders..." << std::endl;
-    TheRenderManager::Instance()->Init();
+    TheRenderManager::Instance()->Init(winWidth, winHeight);
+    std::cout << "Creating framebuffer..." << std::endl;
+    TheRenderManager::Instance()->Use_defered();
 
     std::cout << "Loading scene..." << std::endl;;
     Scene scene;

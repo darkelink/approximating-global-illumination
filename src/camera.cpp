@@ -57,4 +57,6 @@ void Camera::Update_view() {
     view = glm::rotate(view, rotation.y, glm::vec3(0,1,0));
     view = glm::rotate(view, rotation.z, glm::vec3(0,0,1));
     view = glm::translate(view, position);
+
+    mvp = projection * view;
 }

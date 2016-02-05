@@ -11,13 +11,21 @@ TheShaderManager* TheShaderManager::instance = 0;
 // make sure they are in the same order as the enum
 std::vector<std::map<int, std::string> > shaderDefs = {
     {
-        {GL_VERTEX_SHADER, "basic.vert.glsl"},
-        {GL_FRAGMENT_SHADER, "basic.frag.glsl"}
+        {GL_VERTEX_SHADER, "passthrough.vert.glsl"},
+        {GL_FRAGMENT_SHADER, "phong.frag.glsl"}
     },
     {
         {GL_VERTEX_SHADER, "voxelize.vert.glsl"},
         {GL_GEOMETRY_SHADER, "voxelize.geom.glsl"},
         {GL_FRAGMENT_SHADER, "voxelize.frag.glsl"}
+    },
+    {
+        {GL_VERTEX_SHADER, "passthrough.vert.glsl"},
+        {GL_FRAGMENT_SHADER, "texture.frag.glsl"}
+    },
+    {
+        {GL_VERTEX_SHADER, "2d.vert.glsl"},
+        {GL_FRAGMENT_SHADER, "2d.frag.glsl"}
     }
 };
 

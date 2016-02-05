@@ -7,9 +7,7 @@ in vec2 tex;
 in vec3 cam_eye;
 in vec3 cam_norm;
 
-layout (location = 3, bindless_sampler) uniform sampler2D Texture0;
-
-uniform mat4 view;
+layout (location = 0, bindless_sampler) uniform sampler2D Texture0;
 
 out vec4 color;
 
