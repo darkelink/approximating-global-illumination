@@ -38,34 +38,30 @@ void TheRenderManager::Set_scene(Scene scene) {
 
 void TheRenderManager::Set_render_size(int width, int height) {
     glViewport(0, 0, width, height);
-    TheTextureManager::Instance()->Resize_framebuffer(width, height);
+    if (defered) {
+        TheTextureManager::Instance()->Resize_framebuffer(width, height);
+    }
     renderWidth = width;
     renderHeight = height;
 }
 
-void TheRenderManager::Voxelize(int resolution) {
+void TheRenderManager::Voxelize() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glViewport(0, 0, resolution, resolution);
+    glViewport(0, 0, voxelResolution, voxelResolution);
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
-    // need to count voxels to determine buffer size
-    TheShaderManager::Instance()->Use(Shaders::voxelcount);
-    TheShaderManager::Instance()->Set_uniform(Uniform::i1, "gridSize", &resolution);
-
-    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, voxelCount);
-
-    currentScene.Draw();
-
-
     TheShaderManager::Instance()->Use(Shaders::voxelize);
-    TheShaderManager::Instance()->Set_uniform(Uniform::i1, "gridSize", &resolution);
+    TheShaderManager::Instance()->Set_uniform(Uniform::i1,
+            "gridSize", &voxelResolution);
 
-    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, voxelCount);
+    glBindImageTexture(0, voxels, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
 
     currentScene.Draw();
+
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 
     glViewport(0, 0, renderWidth, renderHeight);
@@ -143,18 +139,7 @@ void TheRenderManager::Use_defered() {
     defered = true;
 }
 
-void TheRenderManager::Init_voxelization() {
-    const int zero = 0;
-
-    glGenBuffers(1, &voxelCount);
-    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, voxelCount);
-    glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), &zero, GL_STATIC_DRAW);
-
-    // count voxels
-
-    int count = *(GLuint*)glMapBuffer(GL_ATOMIC_COUNTER_BUFFER, GL_MAP_READ_BIT);
-
-    voxels.push_back(TheTextureManager::Instance()->Create_empty({count}, GL_R32UI));
-    voxels.push_back(TheTextureManager::Instance()->Create_empty({count}, GL_RGBA8));
-    voxels.push_back(TheTextureManager::Instance()->Create_empty({count}, GL_RGBA16F));
+void TheRenderManager::Init_voxelization(int resolution) {
+    voxelResolution = resolution;
+    voxels = TheTextureManager::Instance()->Create_voxel_store(resolution);
 }

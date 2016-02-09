@@ -13,7 +13,6 @@ namespace Shaders {
         defered,
         screen,
         voxelize,
-        voxelcount,
         AMOUNT
     };
 }

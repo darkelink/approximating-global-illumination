@@ -27,6 +27,7 @@ class Scene {
         bool Load_obj_file(std::string filename);
 
         void Draw();
+        void Draw_untextured();
 
     private:
         void gen_buffers();

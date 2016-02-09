@@ -52,13 +52,19 @@ main(int argc, char* argv[]) {
     std::cout << "Loading shaders..." << std::endl;
     TheRenderManager::Instance()->Init(winWidth, winHeight);
     std::cout << "Creating framebuffer..." << std::endl;
-    TheRenderManager::Instance()->Use_defered();
+    //TheRenderManager::Instance()->Use_defered();
 
     std::cout << "Loading scene..." << std::endl;;
     Scene scene;
-    scene.Load_obj_file(argv[1]);
+    if (argc < 2) {
+        std::cout << "No scene given, using res/models/crytek-sponza.obj" << std::endl;
+        scene.Load_obj_file("res/models/crytek-sponza.obj");
+    } else {
+        scene.Load_obj_file(argv[1]);
+    }
     TheRenderManager::Instance()->Set_scene(scene);
 
+    TheRenderManager::Instance()->Init_voxelization(256);
 
     Camera camera;
     camera.Setup();
@@ -86,7 +92,9 @@ main(int argc, char* argv[]) {
         controller.Get_input();
         controller.Update_view(deltaTime);
 
-        TheRenderManager::Instance()->Render(&camera);
+        TheRenderManager::Instance()->Voxelize();
+
+        //TheRenderManager::Instance()->Render(&camera);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

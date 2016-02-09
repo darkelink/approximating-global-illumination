@@ -55,8 +55,19 @@ uint64_t TheTextureManager::Create_empty(std::vector<int> dimentions, GLenum for
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
             glTexImage2D(GL_TEXTURE_2D, 0, format, dimentions[0], dimentions[1], 0,
-                    format, GL_UNSIGNED_BYTE, NULL);
+                    format, GL_UNSIGNED_BYTE, nullptr);
             break;
+        case 3:
+            glBindTexture(GL_TEXTURE_3D, textureID);
+
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, 0);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+            glTexImage3D(GL_TEXTURE_3D, 0, format,
+                    dimentions[0], dimentions[1], dimentions[2], 0,
+                    format, GL_UNSIGNED_BYTE, nullptr);
     }
 
     return make_bindless(textureID);
@@ -84,10 +95,12 @@ uint64_t TheTextureManager::Create_from_file(std::string filename) {
     glBindTexture(GL_TEXTURE_2D, textureID);
     if (components == 3) {
         glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, width, height);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height,
+                GL_RGB, GL_UNSIGNED_BYTE, image);
     } else {// if (components == 4) {
         glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width, height);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, image);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height,
+                GL_RGBA, GL_UNSIGNED_BYTE, image);
     }
 
     uint64_t handle = make_bindless(textureID);
@@ -151,4 +164,23 @@ GLuint TheTextureManager::Resize_framebuffer(int width, int height) {
 
 std::vector<uint64_t> TheTextureManager::Get_framebuffer_textures() {
     return gBufferTextures;
+}
+
+GLuint TheTextureManager::Create_voxel_store(int resolution) {
+    // cannot use bindless textures here
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+
+    glBindTexture(GL_TEXTURE_3D, textureID);
+
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, 0);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    std::vector<unsigned int> zero(resolution*resolution*resolution, 0);
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32UI, resolution, resolution, resolution, 0,
+            GL_RED_INTEGER, GL_UNSIGNED_INT, &zero.front());
+
+    return textureID;
 }

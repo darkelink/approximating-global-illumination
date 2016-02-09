@@ -29,6 +29,8 @@ class TheTextureManager {
         GLuint Resize_framebuffer(int width, int height);
         std::vector<uint64_t> Get_framebuffer_textures();
 
+        GLuint Create_voxel_store(int resolution);
+
     private:
         TheTextureManager(){};
         TheTextureManager(TheTextureManager const&) = delete;

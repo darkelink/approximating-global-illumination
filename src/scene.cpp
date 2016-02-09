@@ -84,6 +84,7 @@ bool Scene::Load_obj_file(std::string filename) {
         dataOffset = data.size() / dataElements;
         indexOffset = indices.size();
     }
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     gen_buffers();
 
@@ -128,9 +129,6 @@ void Scene::gen_buffers() {
 void Scene::Draw() {
     glBindVertexArray(VAO);
 
-    // Draw everything at once
-    // glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
-
     for (auto texMesh : texturedMeshes) {
         glUniformHandleui64ARB(0, texMesh.first);
         for (auto mesh : texMesh.second) {
@@ -138,5 +136,10 @@ void Scene::Draw() {
                     (void*)(mesh->indexOffset * sizeof(GLuint)));
         }
     }
+}
+
+void Scene::Draw_untextured() {
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_BYTE, nullptr);
 }
 
