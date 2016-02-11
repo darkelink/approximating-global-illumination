@@ -67,17 +67,17 @@ void main() {
     ivec3 loc;
 
     if (axis == 0) { // x
-        loc.x = width - width * int(gl_FragCoord.z);
+        loc.x = int(gl_FragDepth);
         loc.y = int(gl_FragCoord.y);
         loc.z = int(gl_FragCoord.x);
     } else if (axis == 1) { // y
         loc.x = int(gl_FragCoord.x);
-        loc.y = width - width * int(gl_FragCoord.z);
+        loc.y = int(gl_FragDepth);
         loc.z = int(gl_FragCoord.y);
     } else { // z
         loc.x = int(gl_FragCoord.x);
         loc.y = int(gl_FragCoord.y);
-        loc.z = width * int(gl_FragCoord.z);
+        loc.z = int(gl_FragDepth);
     }
 
     imageAtomicRGBA8Avg(voxels, loc, texture(Texture0, tex));
