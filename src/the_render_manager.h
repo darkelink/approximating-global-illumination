@@ -38,5 +38,7 @@ class TheRenderManager {
         int voxelResolution;
         GLuint voxels;
 
+        glm::mat4 xorth, yorth, zorth;
+
         bool defered = false;
 };

@@ -4,6 +4,7 @@
 #include "the_texture_manager.h"
 
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -56,6 +57,13 @@ void TheRenderManager::Voxelize() {
     TheShaderManager::Instance()->Use(Shaders::voxelize);
     TheShaderManager::Instance()->Set_uniform(Uniform::i1,
             "gridSize", &voxelResolution);
+
+    TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
+            "xproj", &xorth);
+    TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
+            "yproj", &yorth);
+    TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
+            "zproj", &zorth);
 
     glBindImageTexture(0, voxels, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
 
@@ -142,4 +150,11 @@ void TheRenderManager::Use_defered() {
 void TheRenderManager::Init_voxelization(int resolution) {
     voxelResolution = resolution;
     voxels = TheTextureManager::Instance()->Create_voxel_store(resolution);
+
+    glm::mat4 ortho = glm::ortho(-currentScene.size, currentScene.size,
+            -currentScene.size, currentScene.size,
+            -currentScene.size, currentScene.size);
+    xorth = ortho * glm::lookAt(glm::vec3(1,0,0), glm::vec3(0,0,0), glm::vec3(0,1,0));
+    yorth = ortho * glm::lookAt(glm::vec3(0,1,0), glm::vec3(0,0,0), glm::vec3(1,0,0));
+    zorth = ortho * glm::lookAt(glm::vec3(0,0,1), glm::vec3(0,0,0), glm::vec3(0,1,0));
 }

@@ -16,21 +16,9 @@ flat out vec4 bounds;
 
 uniform int gridSize;
 
-const mat4 xprojection = mat4(
-         0.0     ,  0.0     , -0.000401, 0.0,
-         0.0     ,  0.007812,  0.0     , 0.0,
-        -0.007812,  0.0     ,  0.0     , 0.0,
-        -1.0     , -1.0     , -1.003207, 1.0);
-const mat4 yprojection = mat4(
-        -0.007812,  0.0     ,  0.0     , 0.0,
-         0.0     ,  0.0     , -0.000401, 0.0,
-         0.0     ,  0.007812,  0.0     , 0.0,
-        -1.0     , -1.0     , -1.003207, 1.0);
-const mat4 zprojection = mat4(
-         0.007812,  0.0     ,  0.0     , 0.0,
-         0.0     ,  0.007812,  0.0     , 0.0,
-         0.0     ,  0.0     , -0.000401, 0.0,
-        -1.0     , -1.0     , -1.003207, 1.0);
+uniform mat4 xproj;
+uniform mat4 yproj;
+uniform mat4 zproj;
 
 void main() {
 
@@ -43,13 +31,13 @@ void main() {
     float sizez = abs(faceNormal.z);
 
     if (sizex > sizey && sizex > sizez) {
-        projection = xprojection;
+        projection = xproj;
         axis = 0;
     } else if (sizey > sizez) {
-        projection = yprojection;
+        projection = yproj;
         axis = 1;
     } else {
-        projection = zprojection;
+        projection = zproj;
         axis = 2;
     }
 

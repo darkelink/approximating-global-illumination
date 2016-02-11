@@ -29,6 +29,9 @@ class Scene {
         void Draw();
         void Draw_untextured();
 
+        // assume centered around 0,0,0
+        float size;
+
     private:
         void gen_buffers();
 
@@ -40,6 +43,7 @@ class Scene {
         std::vector<GLubyte> texID;
 
         GLuint VAO, * buffers;
+
 
         const static int dataElements = 8;
 };
