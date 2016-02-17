@@ -93,7 +93,6 @@ main(int argc, char* argv[]) {
         controller.Update_view(deltaTime);
 
         TheRenderManager::Instance()->Voxelize();
-        TheRenderManager::Instance()->Render_voxels();
 
         //TheRenderManager::Instance()->Render(&camera);
         TheRenderManager::Instance()->Render_voxels(&camera);

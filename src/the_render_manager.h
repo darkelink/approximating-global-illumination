@@ -16,7 +16,6 @@ class TheRenderManager {
         void Render(Camera* camera);
         void Render_voxels(Camera* camera);
         void Render_framebuffer();
-        void Render_voxels();
 
         void Use_defered();
         void Init_voxelization(int resolution);

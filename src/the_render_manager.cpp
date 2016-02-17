@@ -102,6 +102,8 @@ void TheRenderManager::Render_voxels(Camera* camera) {
     TheShaderManager::Instance()->Use(Shaders::drawVoxels);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    TheShaderManager::Instance()->Set_uniform(Uniform::i1,
+            "resolution", &voxelResolution);
     TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
             "mvp", glm::value_ptr(camera->mvp));
     glBindImageTexture(0, voxels, 0, GL_TRUE, 0, GL_READ_ONLY, GL_R32UI);
@@ -136,12 +138,6 @@ void TheRenderManager::Render_framebuffer() {
      */
 
     glEnable(GL_DEPTH_TEST);
-}
-
-void TheRenderManager::Render_voxels() {
-    TheShaderManager::Instance()->Use(Shaders::rendervoxels);
-    TheShaderManager::Instance()->Set_uniform(Uniform::1i,
-            "resolution", voxelResolution);
 }
 
 void TheRenderManager::Use_defered() {
