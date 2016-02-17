@@ -3,6 +3,8 @@
 
 #include "the_texture_manager.h"
 
+#include <glm/glm.hpp>
+
 #include <algorithm>
 #include <iostream>
 #include <map>
@@ -35,12 +37,20 @@ bool Scene::Load_obj_file(std::string filename) {
         auto normItr = std::begin(shapes[i].mesh.normals);
         auto texItr  = std::begin(shapes[i].mesh.texcoords);
 
+        float nextVertex;
+
         auto end = std::end(shapes[i].mesh.positions);
         // interleave vertex data in the buffer
         while (vertItr != end) {
-            data.push_back(*vertItr++);
-            data.push_back(*vertItr++);
-            data.push_back(*vertItr++);
+            nextVertex = *vertItr++;
+            size = glm::max(size, glm::abs(nextVertex));
+            data.push_back(nextVertex);
+            nextVertex = *vertItr++;
+            size = glm::max(size, glm::abs(nextVertex));
+            data.push_back(nextVertex);
+            nextVertex = *vertItr++;
+            size = glm::max(size, glm::abs(nextVertex));
+            data.push_back(nextVertex);
 
             data.push_back(*normItr++);
             data.push_back(*normItr++);
