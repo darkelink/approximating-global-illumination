@@ -13,6 +13,8 @@ namespace Shaders {
         defered,
         screen,
         voxelize,
+        drawVoxels,
+        drawPoints,
         AMOUNT
     };
 }

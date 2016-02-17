@@ -14,6 +14,7 @@ class TheRenderManager {
 
         void Voxelize();
         void Render(Camera* camera);
+        void Render_voxels(Camera* camera);
         void Render_framebuffer();
         void Render_voxels();
 
@@ -42,4 +43,6 @@ class TheRenderManager {
         glm::mat4 xorth, yorth, zorth;
 
         bool defered = false;
+
+        GLuint voxelVAO, voxelPos;
 };

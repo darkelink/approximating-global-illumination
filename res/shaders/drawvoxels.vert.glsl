@@ -2,7 +2,7 @@
 
 layout(location = 0) in int resolution;
 
-uniform mvp;
+uniform mat4 mvp;
 
 void main() {
     vec4 position;

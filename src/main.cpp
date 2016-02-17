@@ -96,6 +96,7 @@ main(int argc, char* argv[]) {
         TheRenderManager::Instance()->Render_voxels();
 
         //TheRenderManager::Instance()->Render(&camera);
+        TheRenderManager::Instance()->Render_voxels(&camera);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
