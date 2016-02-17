@@ -127,6 +127,12 @@ void TheRenderManager::Render_framebuffer() {
     glEnable(GL_DEPTH_TEST);
 }
 
+void TheRenderManager::Render_voxels() {
+    TheShaderManager::Instance()->Use(Shaders::rendervoxels);
+    TheShaderManager::Instance()->Set_uniform(Uniform::1i,
+            "resolution", voxelResolution);
+}
+
 void TheRenderManager::Use_defered() {
     if (!defered) {
         framebuffer = TheTextureManager::Instance()->
