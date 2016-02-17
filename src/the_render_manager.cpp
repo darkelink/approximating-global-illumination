@@ -90,6 +90,17 @@ void TheRenderManager::Render(Camera* camera) {
     }
 }
 
+void TheRenderManager::Render_voxels(Camera* camera) {
+    TheShaderManager::Instance()->Use(Shaders::drawVoxels);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
+            "mvp", glm::value_ptr(camera->mvp));
+    glBindImageTexture(0, voxels, 0, GL_TRUE, 0, GL_READ_ONLY, GL_R32UI);
+
+    glDrawArrays(GL_POINTS, 0, voxelResolution*voxelResolution*voxelResolution);
+}
+
 void TheRenderManager::Render_framebuffer() {
     glDisable(GL_DEPTH_TEST);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

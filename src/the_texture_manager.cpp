@@ -83,7 +83,7 @@ uint64_t TheTextureManager::Create_from_file(std::string filename) {
         // texture already exists
         return exists->second;
     }
-    std::cout << filename << std::endl;
+    //std::cout << filename << std::endl;
 
     GLuint textureID;
     glGenTextures(1, &textureID);

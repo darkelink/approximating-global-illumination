@@ -14,6 +14,7 @@ class TheRenderManager {
 
         void Voxelize();
         void Render(Camera* camera);
+        void Render_voxels(Camera* camera);
         void Render_framebuffer();
 
         void Use_defered();
@@ -39,4 +40,6 @@ class TheRenderManager {
         GLuint voxels;
 
         bool defered = false;
+
+        GLuint voxelVAO, voxelPos;
 };
