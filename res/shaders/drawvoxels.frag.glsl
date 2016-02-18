@@ -15,10 +15,10 @@ vec4 convRGBA8ToVec4(uint val) {
 }
 
 void main() {
-    vec4 c = imageLoad(voxels, position.xyz);
-    if (c.a == 0) {
+    uvec4 c = imageLoad(voxels, position.xyz);
+    if (c.r == 0) {
         discard;
     }
-    //color = c;
-    color = vec4(1,1,1,1);
+    color = convRGB8ToVec4(c.r);
+    //color = vec4(1,1,1,1);
 }
