@@ -1,6 +1,6 @@
 #version 430
 
-layout(location = 0) in vec3 position;
+flat in ivec4 position;
 
 layout(location = 0) out vec4 color;
 
@@ -15,5 +15,10 @@ vec4 convRGBA8ToVec4(uint val) {
 }
 
 void main() {
-    color = imageLoad(voxels, ivec3(position));
+    vec4 c = imageLoad(voxels, position.xyz);
+    if (c.a == 0) {
+        discard;
+    }
+    //color = c;
+    color = vec4(1,1,1,1);
 }

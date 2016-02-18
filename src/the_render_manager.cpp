@@ -99,8 +99,10 @@ void TheRenderManager::Render(Camera* camera) {
 }
 
 void TheRenderManager::Render_voxels(Camera* camera) {
-    TheShaderManager::Instance()->Use(Shaders::drawVoxels);
+    TheShaderManager::Instance()->Use(Shaders::drawPoints);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
 
     TheShaderManager::Instance()->Set_uniform(Uniform::i1,
             "resolution", &voxelResolution);
