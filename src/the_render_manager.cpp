@@ -31,6 +31,7 @@ void TheRenderManager::Init(int width, int height) {
     TheShaderManager::Instance()->Load_all();
     renderWidth = width;
     renderHeight = height;
+    currentRenderer = RenderType::phong;
 }
 
 void TheRenderManager::Set_scene(Scene scene) {
@@ -57,6 +58,8 @@ void TheRenderManager::Voxelize() {
     TheShaderManager::Instance()->Use(Shaders::voxelize);
     TheShaderManager::Instance()->Set_uniform(Uniform::i1,
             "gridSize", &voxelResolution);
+    TheShaderManager::Instance()->Set_uniform(Uniform::i1,
+            "gridSize2", &voxelResolution);
 
     TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
             "xproj", &xorth);
@@ -87,30 +90,42 @@ void TheRenderManager::Render(Camera* camera) {
     }
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
-            "view", glm::value_ptr(camera->view));
-    TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
-            "mvp", glm::value_ptr(camera->mvp));
+    float scale = currentScene.size*2/voxelResolution;
 
-    currentScene.Draw();
+    switch (currentRenderer) {
+        case RenderType::phong:
+            TheShaderManager::Instance()->Use(Shaders::shaded);
+            TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
+                    "view", glm::value_ptr(camera->view));
+            TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
+                    "mvp", glm::value_ptr(camera->mvp));
+            currentScene.Draw();
+            break;
+        case RenderType::voxelPoints:
+            TheShaderManager::Instance()->Use(Shaders::drawPoints);
+            TheShaderManager::Instance()->Set_uniform(Uniform::i1,
+                    "resolution", &voxelResolution);
+            TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
+                    "mvp", glm::value_ptr(camera->mvp));
+            TheShaderManager::Instance()->Set_uniform(Uniform::f1,
+                    "scale", &scale);
+            glBindImageTexture(0, voxels, 0, GL_TRUE, 0, GL_READ_ONLY, GL_R32UI);
+            glDrawArrays(GL_POINTS, 0, voxelResolution*voxelResolution*voxelResolution);
+            break;
+        case RenderType::voxelCubes:
+            TheShaderManager::Instance()->Use(Shaders::drawVoxels);
+            TheShaderManager::Instance()->Set_uniform(Uniform::i1,
+                    "resolution", &voxelResolution);
+            TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
+                    "mvp", glm::value_ptr(camera->mvp));
+            glBindImageTexture(0, voxels, 0, GL_TRUE, 0, GL_READ_ONLY, GL_R32UI);
+            glDrawArrays(GL_POINTS, 0, voxelResolution*voxelResolution*voxelResolution);
+            break;
+    }
+
     if (defered) {
         Render_framebuffer();
     }
-}
-
-void TheRenderManager::Render_voxels(Camera* camera) {
-    TheShaderManager::Instance()->Use(Shaders::drawPoints);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
-
-    TheShaderManager::Instance()->Set_uniform(Uniform::i1,
-            "resolution", &voxelResolution);
-    TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
-            "mvp", glm::value_ptr(camera->mvp));
-    glBindImageTexture(0, voxels, 0, GL_TRUE, 0, GL_READ_ONLY, GL_R32UI);
-
-    glDrawArrays(GL_POINTS, 0, voxelResolution*voxelResolution*voxelResolution);
 }
 
 void TheRenderManager::Render_framebuffer() {
@@ -169,7 +184,7 @@ void TheRenderManager::Init_voxelization(int resolution) {
     glm::mat4 ortho = glm::ortho(-currentScene.size, currentScene.size,
             -currentScene.size, currentScene.size,
             -currentScene.size, currentScene.size);
-    xorth = ortho * glm::lookAt(glm::vec3(1,0,0), glm::vec3(0,0,0), glm::vec3(0,1,0));
-    yorth = ortho * glm::lookAt(glm::vec3(0,1,0), glm::vec3(0,0,0), glm::vec3(1,0,0));
-    zorth = ortho * glm::lookAt(glm::vec3(0,0,1), glm::vec3(0,0,0), glm::vec3(0,1,0));
+    xorth = ortho * glm::lookAt(glm::vec3(0,0,0), glm::vec3(1,0,0), glm::vec3(0,1,0));
+    yorth = ortho * glm::lookAt(glm::vec3(0,0,0), glm::vec3(0,1,0), glm::vec3(1,0,0));
+    zorth = ortho * glm::lookAt(glm::vec3(0,0,0), glm::vec3(0,0,1), glm::vec3(0,1,0));
 }

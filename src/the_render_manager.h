@@ -3,6 +3,12 @@
 #include "camera.h"
 #include "scene.h"
 
+enum class RenderType {
+    phong,
+    voxelPoints,
+    voxelCubes
+};
+
 class TheRenderManager {
     public:
         static TheRenderManager* Instance();
@@ -14,11 +20,12 @@ class TheRenderManager {
 
         void Voxelize();
         void Render(Camera* camera);
-        void Render_voxels(Camera* camera);
         void Render_framebuffer();
 
         void Use_defered();
         void Init_voxelization(int resolution);
+
+        RenderType currentRenderer;
 
     private:
         TheRenderManager(){};

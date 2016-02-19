@@ -51,7 +51,7 @@ void main() {
     boundsbox.xy = min(min(vert[0].xy, vert[1].xy), vert[2].xy);
     boundsbox.zw = max(max(vert[0].xy, vert[1].xy), vert[2].xy);
 
-    float displacement = 1.0/256;
+    float displacement = 1.0/gridSize;
     boundsbox.xy -= displacement;
     boundsbox.zw += displacement;
 

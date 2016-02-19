@@ -6,19 +6,19 @@ layout(location = 0) out vec4 color;
 
 uniform layout(binding = 0, r32ui) uimage3D voxels;
 
-vec4 convRGBA8ToVec4(uint val) {
+vec4 voxelColor(uint val) {
     return vec4(
             float((val & 0x000000FF)),
             float((val & 0x0000FF00) >> 8U),
             float((val & 0x00FF0000) >> 16U),
-            float((val & 0xFF000000) >> 24U));
+            float((val & 0xFF000000) >> 24U))/255;
 }
 
 void main() {
-    uvec4 c = imageLoad(voxels, position.xyz);
-    if (c.r == 0) {
+    //color = convRGBA8ToVec4(imageLoad(voxels, position.xyz).r);
+    uint c = imageLoad(voxels, position.xyz).r;
+    if (c <= 0) {
         discard;
     }
-    color = convRGB8ToVec4(c.r);
-    //color = vec4(1,1,1,1);
+    color = voxelColor(c);
 }

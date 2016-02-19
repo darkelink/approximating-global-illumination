@@ -20,7 +20,7 @@ namespace Shaders {
 }
 
 enum class Uniform {
-    mat4, i1
+    mat4, i1, f1
 };
 
 class TheShaderManager {

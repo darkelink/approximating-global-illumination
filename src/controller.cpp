@@ -1,12 +1,12 @@
 #include "controller.h"
 #include "the_shader_manager.h"
+#include "the_render_manager.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
 #include <vector>
 
-constexpr float Controller::speed;
 constexpr float Controller::sens;
 
 Controller::Controller(GLFWwindow* window, Scene* scene) {
@@ -34,6 +34,17 @@ void Controller::Get_input() {
     }
     if (isPressed && glfwGetKey(win, GLFW_KEY_ENTER) == GLFW_RELEASE) {
         isPressed = false;
+    }
+
+    // set render mode
+    if (glfwGetKey(win, GLFW_KEY_1) == GLFW_PRESS) {
+        TheRenderManager::Instance()->currentRenderer = RenderType::phong;
+    }
+    if (glfwGetKey(win, GLFW_KEY_2) == GLFW_PRESS) {
+        TheRenderManager::Instance()->currentRenderer = RenderType::voxelPoints;
+    }
+    if (glfwGetKey(win, GLFW_KEY_3) == GLFW_PRESS) {
+        TheRenderManager::Instance()->currentRenderer = RenderType::voxelCubes;
     }
 
     // movement

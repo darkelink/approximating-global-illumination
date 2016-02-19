@@ -68,9 +68,12 @@ main(int argc, char* argv[]) {
 
     Camera camera;
     camera.Setup();
+    camera.renderFar = scene.size*2;
+    camera.renderNear = scene.size/100;
 
     Controller controller(window, &scene);
     controller.Set_camera(&camera);
+    controller.speed = scene.size/5;
 
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
@@ -78,6 +81,8 @@ main(int argc, char* argv[]) {
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+
+    glPointSize(5);
 
     double currentTime, lastTime = 0;
     float deltaTime;
@@ -94,8 +99,7 @@ main(int argc, char* argv[]) {
 
         TheRenderManager::Instance()->Voxelize();
 
-        //TheRenderManager::Instance()->Render(&camera);
-        TheRenderManager::Instance()->Render_voxels(&camera);
+        TheRenderManager::Instance()->Render(&camera);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

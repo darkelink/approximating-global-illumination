@@ -96,5 +96,8 @@ void TheShaderManager::Set_uniform(Uniform type, std::string name, void* data) {
         case Uniform::i1:
             glUniform1i(location, *((int*)data));
             break;
+        case Uniform::f1:
+            glUniform1f(location, *((float*)data));
+            break;
     }
 }

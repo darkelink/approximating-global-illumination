@@ -17,6 +17,8 @@ class Controller {
         // perform actions
         void Update_view(float dt);
 
+        float speed = 200.0f;
+
     private:
         Camera* camera;
         GLFWwindow* win;
@@ -30,7 +32,6 @@ class Controller {
         double oldx, oldy;
 
         // movement speed
-        static constexpr float speed = 200.0f;
         // look sensitivity
-        static constexpr float sens = 10.0f;
+        static constexpr float sens = 1.0f;
 };

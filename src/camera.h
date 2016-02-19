@@ -28,6 +28,7 @@ class Camera {
 
         glm::mat4 view;
         glm::mat4 mvp;
+        float renderNear, renderFar;
 
     private:
         glm::mat4 projection;
@@ -36,6 +37,5 @@ class Camera {
         glm::vec3 rotation; // pitch, yaw, roll
 
         float fov;
-        float renderNear, renderFar;
         float aspect;
 };
