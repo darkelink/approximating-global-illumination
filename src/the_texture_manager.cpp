@@ -184,3 +184,7 @@ GLuint TheTextureManager::Create_voxel_store(int resolution) {
 
     return textureID;
 }
+
+GLuint TheTextureManager::GetID(uint64_t tex) {
+    return textures[tex];
+}

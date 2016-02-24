@@ -11,16 +11,18 @@ namespace Shaders {
     enum ShaderType : int {
         shaded,
         defered,
-        screen,
+        composite,
+        screenquad,
         voxelize,
-        drawVoxels,
         drawPoints,
+        raytrace,
+        demo,
         AMOUNT
     };
 }
 
 enum class Uniform {
-    mat4, i1, f1
+    mat4, i1, f1, vec3
 };
 
 class TheShaderManager {
@@ -32,6 +34,8 @@ class TheShaderManager {
         void Use(Shaders::ShaderType type);
 
         void Set_uniform(Uniform type, std::string name, void* data);
+
+        void Get_info(GLenum info, GLint* params);
 
     private:
         TheShaderManager(){};

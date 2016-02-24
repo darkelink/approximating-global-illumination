@@ -18,6 +18,7 @@ class Controller {
         void Update_view(float dt);
 
         float speed = 200.0f;
+        bool shouldRender = true;
 
     private:
         Camera* camera;

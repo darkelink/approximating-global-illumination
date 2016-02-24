@@ -65,6 +65,7 @@ main(int argc, char* argv[]) {
     TheRenderManager::Instance()->Set_scene(scene);
 
     TheRenderManager::Instance()->Init_voxelization(256);
+    TheRenderManager::Instance()->Init_raytrace();
 
     Camera camera;
     camera.Setup();
@@ -87,6 +88,7 @@ main(int argc, char* argv[]) {
     double currentTime, lastTime = 0;
     float deltaTime;
 
+    bool shouldRender = controller.shouldRender;
 
     std::cout << "Entering main loop" << std::endl;
     do {
@@ -97,9 +99,12 @@ main(int argc, char* argv[]) {
         controller.Get_input();
         controller.Update_view(deltaTime);
 
-        TheRenderManager::Instance()->Voxelize();
+        if (shouldRender) {
+            TheRenderManager::Instance()->Render(&camera);
+        }
 
-        TheRenderManager::Instance()->Render(&camera);
+        // apply after current frame
+        shouldRender = controller.shouldRender;
 
         glfwSwapBuffers(window);
         glfwPollEvents();

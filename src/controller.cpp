@@ -39,12 +39,15 @@ void Controller::Get_input() {
     // set render mode
     if (glfwGetKey(win, GLFW_KEY_1) == GLFW_PRESS) {
         TheRenderManager::Instance()->currentRenderer = RenderType::phong;
+        shouldRender = true;
     }
     if (glfwGetKey(win, GLFW_KEY_2) == GLFW_PRESS) {
         TheRenderManager::Instance()->currentRenderer = RenderType::voxelPoints;
+        shouldRender = true;
     }
     if (glfwGetKey(win, GLFW_KEY_3) == GLFW_PRESS) {
-        TheRenderManager::Instance()->currentRenderer = RenderType::voxelCubes;
+        TheRenderManager::Instance()->currentRenderer = RenderType::raytrace;
+        shouldRender = true;
     }
 
     // movement

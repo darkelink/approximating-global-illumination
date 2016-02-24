@@ -26,6 +26,11 @@ class Camera {
         // only need to update mvp once per frame
         void Update_view();
 
+        // might as well set uniforms from here
+        void Prepare_raytrace(int width, int height);
+
+        void Print_debug(float scale);
+
         glm::mat4 view;
         glm::mat4 mvp;
         float renderNear, renderFar;

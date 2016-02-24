@@ -20,6 +20,10 @@ std::vector<std::map<GLenum, std::string> > shaderDefs = {
     },
     {
         {GL_VERTEX_SHADER, "2d.vert.glsl"},
+        {GL_FRAGMENT_SHADER, "defered.frag.glsl"}
+    },
+    {
+        {GL_VERTEX_SHADER, "2d.vert.glsl"},
         {GL_FRAGMENT_SHADER, "2d.frag.glsl"}
     },
     {
@@ -29,12 +33,13 @@ std::vector<std::map<GLenum, std::string> > shaderDefs = {
     },
     {
         {GL_VERTEX_SHADER, "drawvoxels.vert.glsl"},
-        {GL_GEOMETRY_SHADER, "makecube.geom.glsl"},
         {GL_FRAGMENT_SHADER, "drawvoxels.frag.glsl"}
     },
     {
-        {GL_VERTEX_SHADER, "drawvoxels.vert.glsl"},
-        {GL_FRAGMENT_SHADER, "drawvoxels.frag.glsl"}
+        {GL_COMPUTE_SHADER, "raytrace.comp.glsl"}
+    },
+    {
+        {GL_COMPUTE_SHADER, "demo.comp.glsl"}
     }
 };
 
@@ -99,5 +104,11 @@ void TheShaderManager::Set_uniform(Uniform type, std::string name, void* data) {
         case Uniform::f1:
             glUniform1f(location, *((float*)data));
             break;
+        case Uniform::vec3:
+            glUniform3fv(location, 1, (float*)data);
     }
+}
+
+void TheShaderManager::Get_info(GLenum info, GLint* params) {
+    glGetProgramiv(shaders[current]->Get_ID(), info, params);
 }

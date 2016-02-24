@@ -31,6 +31,8 @@ class TheTextureManager {
 
         GLuint Create_voxel_store(int resolution);
 
+        GLuint GetID(uint64_t tex);
+
     private:
         TheTextureManager(){};
         TheTextureManager(TheTextureManager const&) = delete;

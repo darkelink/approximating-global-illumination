@@ -22,7 +22,7 @@ vec4 voxelColor(uint val) {
 }
 
 vec4 march(vec3 origin, vec3 direction) {
-    // ray = o+td
+	// ray = o+td
 
     // map origin to grid
     vec3 pos = origin / scale + voxelResolution/2;
@@ -34,42 +34,39 @@ vec4 march(vec3 origin, vec3 direction) {
     move.z = direction.z > 0 ? 1 : -1;
 
     // distances to voxel edge in terms of t
-    vec3 edge = abs((1 - fract(pos)) / direction);
+    vec3 edge = (move - fract(pos)) / direction;
+    // one full voxel distance in terms of t
+    vec3 tDist = move / direction;
 
     uint color;
-
-    int maxSamples = voxelResolution*3;
 
     do {
         // check which edge the ray will cross next
         if (edge.x < edge.y && edge.x < edge.z) {
-            // move ray to that edge
-            pos += edge.x * direction;
-            // check bounds
+            // move the ray into the next voxel
+            pos.x += move.x;
             if (pos.x > voxelResolution || pos.x < 0) {
+                // outside the grid
                 return vec4(1,0,0,1);
             }
+            // ratio between other axises will increase by the equivelent of
+            // 1 voxel in this direction (in terms of t)
+            edge.x += tDist.x;
         } else if (edge.y < edge.z) {
-            pos += edge.y * direction;
+            pos.y += move.y;
             if (pos.y > voxelResolution || pos.y < 0) {
                 return vec4(0,1,0,1);
             }
+            edge.y += tDist.y;
         } else {
-            pos += edge.z * direction;
+            pos.z += move.z;
             if (pos.z > voxelResolution || pos.z < 0) {
                 return vec4(0,0,1,1);
             }
+            edge.z += tDist.z;
         }
-        // get new distances
-        edge = abs((1 - fract(pos)) / direction);
-
         color = imageLoad(voxels, ivec3(pos)).r;
-
-        // avoid an infinate loop
-        if (maxSamples-- == 0) {
-            return vec4(1,1,1,1);
-        }
-    } while (color == 0); // assume no transparency
+    } while (color <= 0); // assume no transparency
 
     return voxelColor(color);
 }

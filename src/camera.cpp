@@ -1,7 +1,11 @@
+#define GLM_SWIZZLE
 #include "camera.h"
+
+#include "the_shader_manager.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include <iostream>
 
@@ -59,4 +63,100 @@ void Camera::Update_view() {
     view = glm::translate(view, position);
 
     mvp = projection * view;
+}
+
+void Camera::Prepare_raytrace(int width, int height) {
+    TheShaderManager::Instance()->Set_uniform(Uniform::vec3,
+            "camera", &position);
+
+    glm::vec3 asdf = glm::vec3(0,0,1);
+    asdf = glm::rotate(asdf, rotation.x, glm::vec3(1,0,0));
+    asdf = glm::rotate(asdf, rotation.y, glm::vec3(0,1,0));
+    asdf = glm::rotate(asdf, rotation.z, glm::vec3(0,0,1));
+
+    float vfov = glm::radians(fov);
+    float hfov = 2*glm::atan(glm::tan(vfov/2)*aspect);
+
+    asdf = glm::rotate(asdf, -vfov/2, glm::vec3(1,0,0));
+    asdf = glm::rotate(asdf, -hfov/2, glm::vec3(0,1,0));
+    TheShaderManager::Instance()->Set_uniform(Uniform::vec3,
+            "topleft", &asdf);
+
+    asdf = glm::rotate(asdf, hfov, glm::vec3(0,1,0));
+    TheShaderManager::Instance()->Set_uniform(Uniform::vec3,
+            "topright", &asdf);
+
+    asdf = glm::vec3(0,0,1);
+    asdf = glm::rotate(asdf, rotation.x, glm::vec3(1,0,0));
+    asdf = glm::rotate(asdf, rotation.y, glm::vec3(0,1,0));
+    asdf = glm::rotate(asdf, rotation.z, glm::vec3(0,0,1));
+
+    asdf = glm::rotate(asdf, vfov/2, glm::vec3(1,0,0));
+    asdf = glm::rotate(asdf, hfov/2, glm::vec3(0,1,0));
+    TheShaderManager::Instance()->Set_uniform(Uniform::vec3,
+            "bottomright", &asdf);
+
+    asdf = glm::rotate(asdf, -hfov, glm::vec3(0,1,0));
+    TheShaderManager::Instance()->Set_uniform(Uniform::vec3,
+            "bottomleft", &asdf);
+/*
+ *    glm::mat4 inv = glm::inverse(mvp);
+ *    glm::vec4 working;
+ *    glm::vec3 scaled;
+ *
+ *    working = glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f);
+ *    working = inv * working;
+ *    working /= working.w;
+ *    scaled = working.xyz() - position;
+ *    TheShaderManager::Instance()->Set_uniform(Uniform::vec3,
+ *            "topleft", &scaled);
+ *
+ *    working = glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f);
+ *    working = inv * working;
+ *    working /= working.w;
+ *    scaled = working.xyz() - position;
+ *    TheShaderManager::Instance()->Set_uniform(Uniform::vec3,
+ *            "topright", &scaled);
+ *
+ *    working = glm::vec4(1.0f, -1.0f, 0.0f, 1.0f);
+ *    working = inv * working;
+ *    working /= working.w;
+ *    scaled = working.xyz() - position;
+ *    TheShaderManager::Instance()->Set_uniform(Uniform::vec3,
+ *            "bottomleft", &scaled);
+ *
+ *    working = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+ *    working = inv * working;
+ *    working /= working.w;
+ *    scaled = working.xyz() - position;
+ *    TheShaderManager::Instance()->Set_uniform(Uniform::vec3,
+ *            "bottomright", &scaled);
+ */
+}
+
+void Camera::Print_debug(float scale) {
+    //std::cout << "camera: " << glm::to_string(position) << std::endl;
+
+    glm::vec3 asdf = glm::vec3(0,0,1);
+
+    asdf = glm::rotate(asdf, rotation.x, glm::vec3(1,0,0));
+    asdf = glm::rotate(asdf, rotation.y, glm::vec3(0,1,0));
+
+    float vfov = glm::radians(fov);
+    float hfov = 2*glm::atan(glm::tan(vfov/2)*aspect);
+
+    std::cout << "direction: " << glm::to_string(asdf) << std::endl;
+
+    asdf = glm::rotate(asdf, -vfov/2, glm::vec3(1,0,0));
+    asdf = glm::rotate(asdf, -hfov/2, glm::vec3(0,1,0));
+    std::cout << "topleft: " << glm::to_string(asdf) << std::endl;
+
+    asdf = glm::rotate(asdf, hfov, glm::vec3(0,1,0));
+    std::cout << "topright: " << glm::to_string(asdf) << std::endl;
+
+    asdf = glm::rotate(asdf, -vfov, glm::vec3(1,0,0));
+    std::cout << "bottomright: " << glm::to_string(asdf) << std::endl;
+
+    asdf = glm::rotate(asdf, -hfov, glm::vec3(0,1,0));
+    std::cout << "bottomleft: " << glm::to_string(asdf) << std::endl;
 }

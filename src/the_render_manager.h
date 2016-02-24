@@ -6,7 +6,7 @@
 enum class RenderType {
     phong,
     voxelPoints,
-    voxelCubes
+    raytrace
 };
 
 class TheRenderManager {
@@ -21,9 +21,11 @@ class TheRenderManager {
         void Voxelize();
         void Render(Camera* camera);
         void Render_framebuffer();
+        void Raytrace(Camera* camera);
 
         void Use_defered();
         void Init_voxelization(int resolution);
+        void Init_raytrace();
 
         RenderType currentRenderer;
 
@@ -43,12 +45,15 @@ class TheRenderManager {
 
         uint64_t* framebufferTextures;
 
+        uint64_t raytraceTex;
+
         int voxelResolution;
         GLuint voxels;
 
         glm::mat4 xorth, yorth, zorth;
 
         bool defered = false;
+        bool raytrace = false;
 
         GLuint voxelVAO, voxelPos;
 };
