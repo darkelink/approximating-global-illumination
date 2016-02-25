@@ -3,9 +3,9 @@
 
 layout (local_size_x = 8, local_size_y = 8) in;
 
-uniform layout(rgba8) image2D frame;
+uniform layout(binding = 0, rgba8) image2D frame;
 //uniform layout(location = 0, bindless_image, rgba8) image2D frame;
-uniform layout(r32ui) uimage3D voxels;
+uniform layout(binding = 1, r32ui) uimage3D voxels;
 
 uniform int voxelResolution;
 uniform float scale;
@@ -22,7 +22,7 @@ vec4 voxelColor(uint val) {
 }
 
 vec4 march(vec3 origin, vec3 direction) {
-	// ray = o+td
+    // ray = o+td
 
     // map origin to grid
     vec3 pos = origin / scale + voxelResolution/2;
@@ -34,39 +34,42 @@ vec4 march(vec3 origin, vec3 direction) {
     move.z = direction.z > 0 ? 1 : -1;
 
     // distances to voxel edge in terms of t
-    vec3 edge = (move - fract(pos)) / direction;
-    // one full voxel distance in terms of t
-    vec3 tDist = move / direction;
+    vec3 edge;
 
     uint color;
 
+    int maxSamples = voxelResolution*3;
+
     do {
+        // get new distances
+        edge = abs((1 - fract(pos)) / direction);
         // check which edge the ray will cross next
         if (edge.x < edge.y && edge.x < edge.z) {
-            // move the ray into the next voxel
-            pos.x += move.x;
+            // move ray to that edge
+            pos += edge.x * direction;
+            // check bounds
             if (pos.x > voxelResolution || pos.x < 0) {
-                // outside the grid
                 return vec4(1,0,0,1);
             }
-            // ratio between other axises will increase by the equivelent of
-            // 1 voxel in this direction (in terms of t)
-            edge.x += tDist.x;
         } else if (edge.y < edge.z) {
-            pos.y += move.y;
+            pos += edge.y * direction;
             if (pos.y > voxelResolution || pos.y < 0) {
                 return vec4(0,1,0,1);
             }
-            edge.y += tDist.y;
         } else {
-            pos.z += move.z;
+            pos += edge.z * direction;
             if (pos.z > voxelResolution || pos.z < 0) {
                 return vec4(0,0,1,1);
             }
-            edge.z += tDist.z;
         }
-        color = imageLoad(voxels, ivec3(pos)).r;
-    } while (color <= 0); // assume no transparency
+
+        color = imageLoad(voxels, ivec3(pos.xzy)).r;
+
+        // avoid an infinate loop
+        if (maxSamples-- == 0) {
+            return vec4(1,1,1,1);
+        }
+    } while (color == 0); // assume no transparency
 
     return voxelColor(color);
 }
@@ -81,7 +84,7 @@ void main() {
     }
 
     // convert to 0-1 range
-    vec2 pos = vec2(pixel) / vec2(size)-1;
+    vec2 pos = vec2(pixel) / (vec2(size)-1);
 
     // trilinear interpolation
     vec3 direction = mix(

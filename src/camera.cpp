@@ -99,39 +99,6 @@ void Camera::Prepare_raytrace(int width, int height) {
     asdf = glm::rotate(asdf, -hfov, glm::vec3(0,1,0));
     TheShaderManager::Instance()->Set_uniform(Uniform::vec3,
             "bottomleft", &asdf);
-/*
- *    glm::mat4 inv = glm::inverse(mvp);
- *    glm::vec4 working;
- *    glm::vec3 scaled;
- *
- *    working = glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f);
- *    working = inv * working;
- *    working /= working.w;
- *    scaled = working.xyz() - position;
- *    TheShaderManager::Instance()->Set_uniform(Uniform::vec3,
- *            "topleft", &scaled);
- *
- *    working = glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f);
- *    working = inv * working;
- *    working /= working.w;
- *    scaled = working.xyz() - position;
- *    TheShaderManager::Instance()->Set_uniform(Uniform::vec3,
- *            "topright", &scaled);
- *
- *    working = glm::vec4(1.0f, -1.0f, 0.0f, 1.0f);
- *    working = inv * working;
- *    working /= working.w;
- *    scaled = working.xyz() - position;
- *    TheShaderManager::Instance()->Set_uniform(Uniform::vec3,
- *            "bottomleft", &scaled);
- *
- *    working = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
- *    working = inv * working;
- *    working /= working.w;
- *    scaled = working.xyz() - position;
- *    TheShaderManager::Instance()->Set_uniform(Uniform::vec3,
- *            "bottomright", &scaled);
- */
 }
 
 void Camera::Print_debug(float scale) {

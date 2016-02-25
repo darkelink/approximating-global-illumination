@@ -199,7 +199,7 @@ void TheRenderManager::Raytrace(Camera* camera) {
 
 
     // TODO: make bindless
-    glBindImageTexture(0, voxels, 0, GL_TRUE, 0, GL_READ_ONLY, GL_R32UI);
+    glBindImageTexture(1, voxels, 0, GL_TRUE, 0, GL_READ_ONLY, GL_R32UI);
     //glUniformHandleui64ARB(0, raytraceTex);
 
     glBindImageTexture(0,
