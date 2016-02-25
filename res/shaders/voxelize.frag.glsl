@@ -78,6 +78,5 @@ void main() {
         loc.z = int(gl_FragCoord.z * gridSize2);
     }
 
-    imageAtomicOr(voxels, ivec3(0,0,0), 100);
     imageAtomicRGBA8Avg(voxels, loc, texture(Texture0, tex));
 }

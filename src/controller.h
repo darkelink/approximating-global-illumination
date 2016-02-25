@@ -32,7 +32,5 @@ class Controller {
 
         double oldx, oldy;
 
-        // movement speed
-        // look sensitivity
         static constexpr float sens = 1.0f;
 };

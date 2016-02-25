@@ -43,4 +43,6 @@ class Camera {
 
         float fov;
         float aspect;
+
+        glm::vec3 get_camera_ray(float x, float y);
 };
