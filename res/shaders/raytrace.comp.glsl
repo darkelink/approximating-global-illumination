@@ -25,7 +25,7 @@ vec4 march(vec3 origin, vec3 direction) {
     // ray = o+td
 
     // map origin to grid
-    vec3 pos = origin / scale + voxelResolution/2;
+    vec3 pos = -origin / scale + voxelResolution/2;
     // TODO: handle outside grid
 
     // use faster integar operations

@@ -16,7 +16,6 @@ namespace Shaders {
         voxelize,
         drawPoints,
         raytrace,
-        demo,
         AMOUNT
     };
 }

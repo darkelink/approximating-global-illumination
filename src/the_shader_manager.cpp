@@ -37,9 +37,6 @@ std::vector<std::map<GLenum, std::string> > shaderDefs = {
     },
     {
         {GL_COMPUTE_SHADER, "raytrace.comp.glsl"}
-    },
-    {
-        {GL_COMPUTE_SHADER, "demo.comp.glsl"}
     }
 };
 
