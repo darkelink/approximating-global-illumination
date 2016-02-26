@@ -257,7 +257,7 @@ void TheRenderManager::Init_voxelization(int resolution) {
                 -currentScene.size, currentScene.size,
                 -currentScene.size, currentScene.size);
         xorth = ortho * lookAt(glm::vec3(0,0,0), vec3(1,0,0), vec3(0,1,0));
-        yorth = ortho * lookAt(glm::vec3(0,0,0), vec3(0,1,0), vec3(1,0,0));
+        yorth = ortho * lookAt(glm::vec3(0,0,0), vec3(0,1,0), vec3(-1,0,0));
         zorth = ortho * lookAt(glm::vec3(0,0,0), vec3(0,0,1), vec3(0,1,0));
     }
 }
