@@ -17,6 +17,9 @@ uniform vec3 topleft, topright, bottomleft, bottomright;
 const vec3 lightDir = normalize(vec3(1,2,1));
 const float ambient = 0.1;
 
+ivec3 lastHit;
+uint lastSample;
+
 vec4 convVoxelData(uint val) {
     return vec4(
             float((val & 0x000000FF)),
@@ -25,7 +28,7 @@ vec4 convVoxelData(uint val) {
             float((val & 0xFF000000) >> 24U)) / 255;
 }
 
-vec4 march(vec3 origin, vec3 direction) {
+bool march(vec3 origin, vec3 direction) {
     // ray = o+td
 
     // map origin to grid
@@ -33,7 +36,7 @@ vec4 march(vec3 origin, vec3 direction) {
     // TODO: handle outside grid
 
     // use faster integar operations
-    ivec3 ipos = ivec3(pos);
+    lastHit = ivec3(pos);
 
     ivec3 move;
     move.x = direction.x > 0 ? 1 : -1;
@@ -45,40 +48,35 @@ vec4 march(vec3 origin, vec3 direction) {
     // one voxel distance in terms of t
     vec3 tDist = move / direction;
 
-    uint color;
-
     do {
         // check which edge the ray will cross next
         if (edge.x < edge.y && edge.x < edge.z) {
             // move the ray into the next voxel
-            ipos.x += move.x;
-            if (ipos.x > voxelResolution || ipos.x < 0) {
+            lastHit.x += move.x;
+            if (lastHit.x > voxelResolution || lastHit.x < 0) {
                 // outside the grid
-                return vec4(0,0,0,1);
+                return false;
             }
             // ratio between other axises will increase by the equivelent of
             // 1 voxel in this direction (in terms of t)
             edge.x += tDist.x;
         } else if (edge.y < edge.z) {
-            ipos.y += move.y;
-            if (ipos.y > voxelResolution || ipos.y < 0) {
-                return vec4(0,0,0,1);
+            lastHit.y += move.y;
+            if (lastHit.y > voxelResolution || lastHit.y < 0) {
+                return false;
             }
             edge.y += tDist.y;
         } else {
-            ipos.z += move.z;
-            if (ipos.z > voxelResolution || ipos.z < 0) {
-                return vec4(0,0,0,1);
+            lastHit.z += move.z;
+            if (lastHit.z > voxelResolution || lastHit.z < 0) {
+                return false;
             }
             edge.z += tDist.z;
         }
-        color = imageLoad(voxelColor, ipos).r;
-    } while (color <= 0); // assume no transparency
+        lastSample = imageLoad(voxelColor, lastHit).r;
+    } while (lastSample <= 0); // assume no transparency
 
-    vec4 normal = convVoxelData(imageLoad(voxelNorm, ipos).r);
-    vec4 diffuse = convVoxelData(color);
-
-    return 0.1 * diffuse + diffuse * max(dot(normal.xyz, lightDir), 0);
+    return true;
 }
 
 void main() {
@@ -91,7 +89,7 @@ void main() {
     }
 
     // convert to 0-1 range
-    vec2 pos = vec2(pixel) / (vec2(size)-1);
+    vec2 pos = vec2(pixel) / (size-1);
 
     // bilinear interpolation
     vec3 direction = mix(
@@ -99,5 +97,15 @@ void main() {
             mix(topleft, topright, pos.x),
             pos.y);
 
-    imageStore(frame, pixel, march(camera, direction));
+    if (march(camera, direction)) {
+        vec4 diffuse = convVoxelData(lastSample);
+        vec3 normal = convVoxelData(imageLoad(voxelNorm, lastHit).r).xyz;
+
+        vec4 color = diffuse * 0.1 + diffuse * max(dot(normal, lightDir), 0);
+
+        imageStore(frame, pixel, color);
+    } else {
+        // ray didn't hit anything
+        imageStore(frame, pixel, vec4(0,0,0,1));
+    }
 }
