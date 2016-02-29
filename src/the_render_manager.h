@@ -6,6 +6,7 @@
 enum class RenderType {
     phong,
     voxelPoints,
+    directvolume,
     raytrace
 };
 
@@ -21,7 +22,7 @@ class TheRenderManager {
         void Voxelize();
         void Render(Camera* camera);
         void Render_framebuffer();
-        void Raytrace(Camera* camera);
+        void Raytrace(Camera* camera, bool full);
 
         void Use_defered();
         void Init_voxelization(int resolution);
@@ -48,7 +49,7 @@ class TheRenderManager {
         uint64_t raytraceTex;
 
         int voxelResolution;
-        GLuint voxels;
+        GLuint voxelColor, voxelNorm;
 
         glm::mat4 xorth, yorth, zorth;
 

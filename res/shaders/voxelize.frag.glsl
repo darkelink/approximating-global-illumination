@@ -2,9 +2,7 @@
 #extension GL_ARB_bindless_texture : require
 
 flat in int axis;
-flat in vec4 bounds;
 
-in vec3 pos;
 in vec3 norm;
 in vec2 tex;
 
@@ -12,9 +10,10 @@ layout(pixel_center_integer) in vec4 gl_FragCoord;
 
 layout(location = 0, bindless_sampler) uniform sampler2D Texture0;
 
-uniform layout(binding = 0, r32ui) uimage3D voxels;
+uniform layout(binding = 0, r32ui) uimage3D voxelColor;
+uniform layout(binding = 1, r32ui) uimage3D voxelNorm;
 
-uniform int gridSize2;
+uniform int gridSize;
 
 vec4 convRGBA8ToVec4(uint val) {
     return vec4(
@@ -58,25 +57,23 @@ void imageAtomicRGBA8Avg(layout(r32ui) coherent  volatile  uimage3D imgUI,
 
 
 void main() {
-    if (pos.x < bounds.x || pos.y < bounds.y || pos.x > bounds.z || pos.y > bounds.w) {
-        discard;
-    }
-
     ivec3 loc;
 
     if (axis == 0) { // x
-        loc.x = int(gl_FragCoord.z * (gridSize2) + 1);
+        loc.x = int(gl_FragCoord.z * gridSize + 1);
         loc.y = int(gl_FragCoord.y);
         loc.z = int(gl_FragCoord.x);
     } else if (axis == 1) { // y
-        loc.x = int(gridSize2 - gl_FragCoord.y);
-        loc.y = int(gl_FragCoord.z * (gridSize2));
+        loc.x = int(gridSize - gl_FragCoord.y);
+        loc.y = int(gl_FragCoord.z * gridSize);
         loc.z = int(gl_FragCoord.x);
     } else { // z
-        loc.x = int(gridSize2 - gl_FragCoord.x);
+        loc.x = int(gridSize - gl_FragCoord.x);
         loc.y = int(gl_FragCoord.y);
-        loc.z = int(gl_FragCoord.z * (gridSize2));
+        loc.z = int(gl_FragCoord.z * gridSize);
     }
 
-    imageAtomicRGBA8Avg(voxels, loc, texture(Texture0, tex));
+    imageAtomicRGBA8Avg(voxelColor, loc, texture(Texture0, tex));
+
+    imageAtomicRGBA8Avg(voxelNorm, loc, vec4(norm, 1));
 }

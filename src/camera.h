@@ -11,7 +11,7 @@
 
 class Camera {
     public:
-        void Setup();
+        void Setup(float sceneSize);
 
         void Use();
         void Set_render_distance(float near, float far);
@@ -33,7 +33,6 @@ class Camera {
 
         glm::mat4 view;
         glm::mat4 mvp;
-        float renderNear, renderFar;
 
     private:
         glm::mat4 projection;
@@ -43,6 +42,8 @@ class Camera {
 
         float fov;
         float aspect;
+
+        float renderNear, renderFar;
 
         glm::vec3 get_camera_ray(float x, float y);
 };

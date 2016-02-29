@@ -46,6 +46,10 @@ void Controller::Get_input() {
         shouldRender = true;
     }
     if (glfwGetKey(win, GLFW_KEY_3) == GLFW_PRESS) {
+        TheRenderManager::Instance()->currentRenderer = RenderType::directvolume;
+        shouldRender = true;
+    }
+    if (glfwGetKey(win, GLFW_KEY_4) == GLFW_PRESS) {
         TheRenderManager::Instance()->currentRenderer = RenderType::raytrace;
         shouldRender = true;
     }

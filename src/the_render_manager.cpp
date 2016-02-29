@@ -93,8 +93,6 @@ void TheRenderManager::Voxelize() {
     TheShaderManager::Instance()->Use(Shaders::voxelize);
     TheShaderManager::Instance()->Set_uniform(Uniform::i1,
             "gridSize", &voxelResolution);
-    TheShaderManager::Instance()->Set_uniform(Uniform::i1,
-            "gridSize2", &voxelResolution);
 
     TheShaderManager::Instance()->Set_uniform(Uniform::mat4,
             "xproj", &xorth);
@@ -104,7 +102,8 @@ void TheRenderManager::Voxelize() {
             "zproj", &zorth);
 
     // TODO: make bindless
-    glBindImageTexture(0, voxels, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
+    glBindImageTexture(0, voxelColor, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
+    glBindImageTexture(1, voxelNorm,   0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
 
     currentScene.Draw();
 
@@ -149,14 +148,19 @@ void TheRenderManager::Render(Camera* camera) {
                     "mvp", glm::value_ptr(camera->mvp));
             TheShaderManager::Instance()->Set_uniform(Uniform::f1,
                     "scale", &scale);
-            glBindImageTexture(0, voxels, 0, GL_TRUE, 0,
+            glBindImageTexture(0, voxelColor, 0, GL_TRUE, 0,
                     GL_READ_ONLY, GL_R32UI);
             // draw a point at every location and discard in the shader
             glDrawArrays(GL_POINTS, 0,
                     voxelResolution * voxelResolution * voxelResolution);
             break;
+        case RenderType::directvolume:
+            Voxelize();
+            Raytrace(camera, false);
+            break;
         case RenderType::raytrace:
-            Raytrace(camera);
+            Voxelize();
+            Raytrace(camera, true);
             break;
     }
 
@@ -194,13 +198,15 @@ void TheRenderManager::Render_framebuffer() {
     }
 }
 
-void TheRenderManager::Raytrace(Camera* camera) {
-    TheShaderManager::Instance()->Use(Shaders::raytrace);
+void TheRenderManager::Raytrace(Camera* camera, bool full) {
+    if (full) {
+        TheShaderManager::Instance()->Use(Shaders::raytrace);
+        glBindImageTexture(2, voxelNorm, 0, GL_TRUE, 0, GL_READ_ONLY, GL_R32UI);
+    } else {
+        TheShaderManager::Instance()->Use(Shaders::dvr);
+    }
 
-
-    // TODO: make bindless
-    glBindImageTexture(1, voxels, 0, GL_TRUE, 0, GL_READ_ONLY, GL_R32UI);
-    //glUniformHandleui64ARB(0, raytraceTex);
+    glBindImageTexture(1, voxelColor, 0, GL_TRUE, 0, GL_READ_ONLY, GL_R32UI);
 
     glBindImageTexture(0,
             TheTextureManager::Instance()->GetID(raytraceTex),
@@ -249,7 +255,8 @@ void TheRenderManager::Use_defered() {
 
 void TheRenderManager::Init_voxelization(int resolution) {
     voxelResolution = resolution;
-    voxels = TheTextureManager::Instance()->Create_voxel_store(resolution);
+    voxelColor = TheTextureManager::Instance()->Create_voxel_store(resolution);
+    voxelNorm  = TheTextureManager::Instance()->Create_voxel_store(resolution);
 
     {
         using namespace glm;

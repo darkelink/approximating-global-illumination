@@ -36,6 +36,9 @@ std::vector<std::map<GLenum, std::string> > shaderDefs = {
         {GL_FRAGMENT_SHADER, "drawvoxels.frag.glsl"}
     },
     {
+        {GL_COMPUTE_SHADER, "directvolume.comp.glsl"}
+    },
+    {
         {GL_COMPUTE_SHADER, "raytrace.comp.glsl"}
     }
 };

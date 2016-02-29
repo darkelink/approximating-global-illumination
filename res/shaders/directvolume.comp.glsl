@@ -6,7 +6,6 @@ layout (local_size_x = 8, local_size_y = 8) in;
 uniform layout(binding = 0, rgba8) image2D frame;
 //uniform layout(location = 0, bindless_image, rgba8) image2D frame;
 uniform layout(binding = 1, r32ui) uimage3D voxelColor;
-uniform layout(binding = 2, r32ui) uimage3D voxelNorm;
 
 uniform int voxelResolution;
 uniform float scale;
@@ -14,10 +13,7 @@ uniform float scale;
 uniform vec3 camera;
 uniform vec3 topleft, topright, bottomleft, bottomright;
 
-const vec3 lightDir = normalize(vec3(1,2,1));
-const float ambient = 0.1;
-
-vec4 convVoxelData(uint val) {
+vec4 getVoxelColor(uint val) {
     return vec4(
             float((val & 0x000000FF)),
             float((val & 0x0000FF00) >> 8U),
@@ -75,10 +71,7 @@ vec4 march(vec3 origin, vec3 direction) {
         color = imageLoad(voxelColor, ipos).r;
     } while (color <= 0); // assume no transparency
 
-    vec4 normal = convVoxelData(imageLoad(voxelNorm, ipos).r);
-    vec4 diffuse = convVoxelData(color);
-
-    return 0.1 * diffuse + diffuse * max(dot(normal.xyz, lightDir), 0);
+    return getVoxelColor(color);
 }
 
 void main() {

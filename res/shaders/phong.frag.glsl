@@ -11,7 +11,7 @@ layout (location = 0, bindless_sampler) uniform sampler2D Texture0;
 
 out vec4 color;
 
-const vec3 lightDir = normalize(vec3(1,2,0));
+const vec3 lightDir = normalize(vec3(1,2,3));
 const int specExp = 5;
 const float ambient = 0.1;
 

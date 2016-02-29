@@ -15,6 +15,7 @@ namespace Shaders {
         screenquad,
         voxelize,
         drawPoints,
+        dvr,
         raytrace,
         AMOUNT
     };

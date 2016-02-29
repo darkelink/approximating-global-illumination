@@ -30,7 +30,7 @@ main(int argc, char* argv[]) {
     }
     glfwMakeContextCurrent(window);
     glewExperimental = GL_TRUE;
-    glfwSwapInterval(0);
+    glfwSwapInterval(1);
 
     std::cout << "Loading GLEW..." << std::endl;
     if (glewInit() != GLEW_OK) {
@@ -68,9 +68,7 @@ main(int argc, char* argv[]) {
     TheRenderManager::Instance()->Init_raytrace();
 
     Camera camera;
-    camera.Setup();
-    camera.renderFar = scene.size*2;
-    camera.renderNear = scene.size/100;
+    camera.Setup(scene.size);
 
     Controller controller(window, &scene);
     controller.Set_camera(&camera);

@@ -9,13 +9,13 @@
 
 #include <iostream>
 
-void Camera::Setup() {
+void Camera::Setup(float sceneSize) {
     // load some default values
     position = glm::vec3(0,0,0);
     rotation = glm::vec3(0,0,0);
-    renderNear = 10.0f;
-    renderFar = 5000.0f;
-    aspect = 1.0f;
+    renderNear = sceneSize/100;
+    renderFar = sceneSize*2;
+    aspect = 16.0f/9.0f;
     fov = 90.0f;
 
     projection = glm::perspective(glm::radians(fov), aspect, renderNear, renderFar);
