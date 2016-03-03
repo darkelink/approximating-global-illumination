@@ -162,6 +162,9 @@ void TheRenderManager::Render(Camera* camera) {
             Voxelize();
             Raytrace(camera, true);
             break;
+        case RenderType::raytrace_fast:
+            Raytrace(camera, true);
+            break;
     }
 
     if (defered) {

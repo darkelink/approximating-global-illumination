@@ -22,6 +22,9 @@ main(int argc, char* argv[]) {
 
     int testHeight, testWidth;
 
+    // MSAAx4 - fixes holes in voxelisation
+    glfwWindowHint(GLFW_SAMPLES, 4);
+
     GLFWwindow* window = glfwCreateWindow(winWidth, winHeight, "Voxels", NULL, NULL);
     if (!window) {
         std::cerr << "ERROR: could not open window" << std::endl;
@@ -30,7 +33,7 @@ main(int argc, char* argv[]) {
     }
     glfwMakeContextCurrent(window);
     glewExperimental = GL_TRUE;
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
 
     std::cout << "Loading GLEW..." << std::endl;
     if (glewInit() != GLEW_OK) {
@@ -80,6 +83,8 @@ main(int argc, char* argv[]) {
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+
+    glEnable(GL_MULTISAMPLE);
 
     glPointSize(5);
 

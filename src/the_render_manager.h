@@ -7,7 +7,8 @@ enum class RenderType {
     phong,
     voxelPoints,
     directvolume,
-    raytrace
+    raytrace,
+    raytrace_fast
 };
 
 class TheRenderManager {

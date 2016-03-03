@@ -14,7 +14,7 @@ uniform float scale;
 uniform vec3 camera;
 uniform vec3 topleft, topright, bottomleft, bottomright;
 
-const vec3 lightDir = normalize(vec3(1,2,1));
+const vec3 lightDir = normalize(vec3(1,1.5,0.2));
 const float ambient = 0.1;
 
 ivec3 lastHit;
@@ -31,12 +31,8 @@ vec4 convVoxelData(uint val) {
 bool march(vec3 origin, vec3 direction) {
     // ray = o+td
 
-    // map origin to grid
-    vec3 pos = -origin / scale + voxelResolution/2;
-    // TODO: handle outside grid
-
     // use faster integar operations
-    lastHit = ivec3(pos);
+    lastHit = ivec3(origin);
 
     ivec3 move;
     move.x = direction.x > 0 ? 1 : -1;
@@ -44,7 +40,7 @@ bool march(vec3 origin, vec3 direction) {
     move.z = direction.z > 0 ? 1 : -1;
 
     // distances to voxel edge in terms of t (voxel width is 1)
-    vec3 edge = (move+1)/2 - fract(pos);
+    vec3 edge = (move+1)/2 - fract(origin);
     // one voxel distance in terms of t
     vec3 tDist = move / direction;
 
@@ -97,15 +93,25 @@ void main() {
             mix(topleft, topright, pos.x),
             pos.y);
 
-    if (march(camera, direction)) {
+    // map origin to grid
+    vec3 origin = -camera / scale + voxelResolution/2;
+    // TODO: handle outside grid
+
+    if (march(origin, direction)) {
         vec4 diffuse = convVoxelData(lastSample);
         vec3 normal = convVoxelData(imageLoad(voxelNorm, lastHit).r).xyz;
+        vec4 color;
 
-        vec4 color = diffuse * 0.1 + diffuse * max(dot(normal, lightDir), 0);
-
+        if (march(vec3(lastHit + vec3(0,1,0)), lightDir)) {
+            // in shadow
+            color = diffuse * 0.1;
+        } else {
+            color = diffuse * max(dot(normal, lightDir), 0);
+        }
         imageStore(frame, pixel, color);
+
     } else {
         // ray didn't hit anything
-        imageStore(frame, pixel, vec4(0,0,0,1));
+        imageStore(frame, pixel, vec4(1,1,1,1));
     }
 }

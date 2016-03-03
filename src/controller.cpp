@@ -53,6 +53,10 @@ void Controller::Get_input() {
         TheRenderManager::Instance()->currentRenderer = RenderType::raytrace;
         shouldRender = true;
     }
+    if (glfwGetKey(win, GLFW_KEY_5) == GLFW_PRESS) {
+        TheRenderManager::Instance()->currentRenderer = RenderType::raytrace_fast;
+        shouldRender = true;
+    }
 
     // movement
     //
