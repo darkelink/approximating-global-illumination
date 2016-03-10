@@ -29,8 +29,6 @@ class Camera {
         // might as well set uniforms from here
         void Prepare_raytrace(int width, int height);
 
-        void Print_debug(float scale);
-
         glm::mat4 view;
         glm::mat4 mvp;
 

@@ -90,6 +90,8 @@ main(int argc, char* argv[]) {
 
     double currentTime, lastTime = 0;
     float deltaTime;
+    float frameTime = 0;
+    int frameCount;
 
     bool shouldRender = controller.shouldRender;
 
@@ -98,6 +100,13 @@ main(int argc, char* argv[]) {
         currentTime = glfwGetTime();
         deltaTime = float(currentTime - lastTime);
         lastTime = currentTime;
+        frameTime += deltaTime;
+        ++frameCount;
+        if (frameTime > 1) {
+            glfwSetWindowTitle(window, std::to_string(frameCount / frameTime).c_str());
+            frameTime = 0;
+            frameCount = 0;
+        }
 
         controller.Get_input();
         controller.Update_view(deltaTime);

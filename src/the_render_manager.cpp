@@ -80,6 +80,10 @@ void TheRenderManager::Set_render_size(int width, int height) {
 }
 
 void TheRenderManager::Voxelize() {
+    TheTextureManager::Instance()->Delete(raytraceTex);
+    raytraceTex = TheTextureManager::Instance()->Create_empty(
+            {renderWidth, renderHeight}, GL_RGBA);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // camera should be same size as voxel grid

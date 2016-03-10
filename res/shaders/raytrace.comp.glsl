@@ -17,15 +17,20 @@ uniform vec3 topleft, topright, bottomleft, bottomright;
 const vec3 lightDir = normalize(vec3(1,1.5,0.2));
 const float ambient = 0.1;
 
+const int MAX_DEPTH = 2;
+const int MAX_SAMPLES = 10;
+
 ivec3 lastHit;
 uint lastSample;
+
+vec3 asdf;
 
 vec4 convVoxelData(uint val) {
     return vec4(
             float((val & 0x000000FF)),
             float((val & 0x0000FF00) >> 8U),
             float((val & 0x00FF0000) >> 16U),
-            float((val & 0xFF000000) >> 24U)) / 255;
+            float((val & 0xFF000000) >> 24U)) / 255.0f;
 }
 
 bool march(vec3 origin, vec3 direction) {
@@ -49,6 +54,7 @@ bool march(vec3 origin, vec3 direction) {
         if (edge.x < edge.y && edge.x < edge.z) {
             // move the ray into the next voxel
             lastHit.x += move.x;
+            origin.x += move.x;
             if (lastHit.x > voxelResolution || lastHit.x < 0) {
                 // outside the grid
                 return false;
@@ -58,12 +64,14 @@ bool march(vec3 origin, vec3 direction) {
             edge.x += tDist.x;
         } else if (edge.y < edge.z) {
             lastHit.y += move.y;
+            origin.y += move.y;
             if (lastHit.y > voxelResolution || lastHit.y < 0) {
                 return false;
             }
             edge.y += tDist.y;
         } else {
             lastHit.z += move.z;
+            origin.z += move.z;
             if (lastHit.z > voxelResolution || lastHit.z < 0) {
                 return false;
             }
@@ -72,7 +80,52 @@ bool march(vec3 origin, vec3 direction) {
         lastSample = imageLoad(voxelColor, lastHit).r;
     } while (lastSample <= 0); // assume no transparency
 
+    asdf = origin;
     return true;
+}
+
+vec4 radience(vec3 origin, vec3 direction) {
+    vec4 color = vec4(1,1,1,1);
+
+    float r1 = noise1(0);
+    float r2 = noise1(1);
+
+    vec3 normal = lightDir;
+
+    for (int i = 0; i < MAX_DEPTH; ++i) {
+        if (!march(origin, direction)) {
+            // ray missed geometry
+            if (march(origin, lightDir)) {
+                // last point was in shadow
+                return color * 0.05;
+            }
+
+            return color * max(dot(normal, lightDir), 0);
+        }
+
+        normal = normalize(convVoxelData(imageLoad(voxelNorm, lastHit).r).xyz);
+        vec3 hit = asdf + normal;
+        vec4 col = convVoxelData(lastSample);
+
+
+        if (!march(hit, lightDir)) {
+            return color * col * max(dot(normal, lightDir), 0.0);
+        }
+
+        vec3 u = normalize(cross((abs(normal.x) > .1 ? vec3(0, 1, 0) : vec3(1, 0, 0)), normal));
+        vec3 v = cross(normal,u);
+
+        r1 = noise1(r1);
+        r2 = noise1(r2);
+        float r2s = sqrt(r2);
+
+        direction = normalize(u*cos(r1)*r2s + v*sin(r1)*r2s + normal*sqrt(1 - r2));
+        origin = hit;
+
+        color *= col * max(dot(normal, direction), 0.1);
+    }
+
+    return color * max(dot(normal, lightDir), 0);
 }
 
 void main() {
@@ -97,21 +150,15 @@ void main() {
     vec3 origin = -camera / scale + voxelResolution/2;
     // TODO: handle outside grid
 
-    if (march(origin, direction)) {
-        vec4 diffuse = convVoxelData(lastSample);
-        vec3 normal = convVoxelData(imageLoad(voxelNorm, lastHit).r).xyz;
-        vec4 color;
+    vec4 color = vec4(0,0,0,0);
 
-        if (march(vec3(lastHit + vec3(0,1,0)), lightDir)) {
-            // in shadow
-            color = diffuse * 0.1;
-        } else {
-            color = diffuse * max(dot(normal, lightDir), 0);
-        }
-        imageStore(frame, pixel, color);
+    vec4 diffuse;
+    vec3 normal;
+    vec3 intercept;
 
-    } else {
-        // ray didn't hit anything
-        imageStore(frame, pixel, vec4(1,1,1,1));
+    for (int i = 1; i < MAX_SAMPLES; ++i) {
+        color += radience(origin, direction) * 1/MAX_SAMPLES;
     }
+
+    imageStore(frame, pixel, color);
 }

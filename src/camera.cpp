@@ -88,19 +88,6 @@ void Camera::Prepare_raytrace(int width, int height) {
             "topright", &asdf);
 }
 
-void Camera::Print_debug(float scale) {
-    std::cout << "position: " << glm::to_string(position) << std::endl;
-
-    glm::vec3 asdf;
-
-    std::cout << "direction: " << glm::to_string(get_camera_ray(0,0)) << std::endl;
-
-    std::cout << "topleft: " << glm::to_string(get_camera_ray(-1,1)) << std::endl;
-    std::cout << "topright: " << glm::to_string(get_camera_ray(1,1)) << std::endl;
-    std::cout << "bottomleft: " << glm::to_string(get_camera_ray(-1,-1)) << std::endl;
-    std::cout << "bottomright: " << glm::to_string(get_camera_ray(1,-1)) << std::endl;
-}
-
 glm::vec3 Camera::get_camera_ray(float x, float y) {
     glm::vec4 working = glm::inverse(projection) * glm::vec4(x,y,0,1);
     working.w = 0;
