@@ -15,7 +15,6 @@ vec4 voxelColor(uint val) {
 }
 
 void main() {
-    //color = convRGBA8ToVec4(imageLoad(voxels, position.xyz).r);
     uint c = imageLoad(voxels, position.xyz).r;
     if (c <= 0) {
         discard;

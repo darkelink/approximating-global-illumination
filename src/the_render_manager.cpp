@@ -13,7 +13,7 @@
 
 
 // only really need this here and doesn't fit in the class
-// shamelessly taken from http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+// taken from http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
 int Round_next_power2(unsigned int v) {
     v--;
     v |= v >> 1;
@@ -262,6 +262,8 @@ void TheRenderManager::Use_defered() {
 
 void TheRenderManager::Init_voxelization(int resolution) {
     voxelResolution = resolution;
+    // using parallel structures for ease of use
+    // TODO: optimise structures
     voxelColor = TheTextureManager::Instance()->Create_voxel_store(resolution);
     voxelNorm  = TheTextureManager::Instance()->Create_voxel_store(resolution);
 

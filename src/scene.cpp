@@ -15,6 +15,7 @@ bool Scene::Load_obj_file(std::string filename) {
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
 
+    // assume all models are in res/models/ for now
     bool ret = tinyobj::LoadObj(shapes, materials, err, filename.c_str(), "res/models/");
     if (!err.empty()) {
         std::cerr << err << std::endl;
@@ -40,7 +41,7 @@ bool Scene::Load_obj_file(std::string filename) {
         float nextVertex;
 
         auto end = std::end(shapes[i].mesh.positions);
-        // interleave vertex data in the buffer
+        // interleave vertex data in the buffer for rendering speed
         while (vertItr != end) {
             nextVertex = *vertItr++;
             size = glm::max(size, glm::abs(nextVertex));
@@ -68,6 +69,7 @@ bool Scene::Load_obj_file(std::string filename) {
 
         auto matID = materials[shapes[i].mesh.material_ids[0]];
         std::string filename;
+        // use texture filename as key for indexing materials
         if (matID.diffuse_texname.empty()) {
             filename = "";
         } else {

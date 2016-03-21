@@ -87,8 +87,8 @@ bool march(vec3 origin, vec3 direction) {
 vec4 radience(vec3 origin, vec3 direction) {
     vec4 color = vec4(1,1,1,1);
 
-    float r1 = noise1(0);
-    float r2 = noise1(1);
+    float r1 = noise1(gl_GlobalInvocationID.x);
+    float r2 = noise1(gl_GlobalInvocationID.y);
 
     vec3 normal = lightDir;
 

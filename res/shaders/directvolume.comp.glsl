@@ -1,6 +1,7 @@
 #version 430
 #extension GL_ARB_bindless_texture : require
 
+// does not use shared memory so these could be any number
 layout (local_size_x = 8, local_size_y = 8) in;
 
 uniform layout(binding = 0, rgba8) image2D frame;

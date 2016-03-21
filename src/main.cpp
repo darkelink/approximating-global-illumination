@@ -86,6 +86,7 @@ main(int argc, char* argv[]) {
 
     glEnable(GL_MULTISAMPLE);
 
+    // see voxel points easier
     glPointSize(5);
 
     double currentTime, lastTime = 0;
@@ -100,6 +101,8 @@ main(int argc, char* argv[]) {
         currentTime = glfwGetTime();
         deltaTime = float(currentTime - lastTime);
         lastTime = currentTime;
+
+        // print framerate every second
         frameTime += deltaTime;
         ++frameCount;
         if (frameTime > 1) {

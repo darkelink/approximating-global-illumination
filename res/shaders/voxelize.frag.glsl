@@ -15,7 +15,7 @@ uniform layout(binding = 1, r32ui) uimage3D voxelNorm;
 
 uniform int gridSize;
 
-vec4 convRGBA8ToVec4(uint val) {
+vec4 getVoxelData(uint val) {
     return vec4(
             float((val & 0x000000FF)),
             float((val & 0x0000FF00) >> 8U),
@@ -23,7 +23,7 @@ vec4 convRGBA8ToVec4(uint val) {
             float((val & 0xFF000000) >> 24U));
 }
 
-uint convVec4ToRGBA8(vec4 val) {
+uint calcVoxelData(vec4 val) {
     return
         (uint(val.w) & 0x000000FF) << 24U |
         (uint(val.z) & 0x000000FF) << 16U |
@@ -31,27 +31,28 @@ uint convVec4ToRGBA8(vec4 val) {
         (uint(val.x) & 0x000000FF);
 }
 
-void imageAtomicRGBA8Avg(layout(r32ui) coherent  volatile  uimage3D imgUI, 
-        ivec3 coords, vec4 val) {
+void storeVoxelData(layout(r32ui) coherent  volatile  uimage3D img, ivec3 coords,
+        vec4 data) {
 
-    val.rgb *= 255.0f;
-    uint newVal = convVec4ToRGBA8(val);
-    uint prevStoredVal = 0;
-    uint curStoredVal;
+    data.rgb *= 255.0f;
+    uint newVal = calcVoxelData(data);
+    uint prev = 0;
+    uint current;
 
-    //Loop as  long as  destination value  gets changed  by  other  threads
-    while((curStoredVal = imageAtomicCompSwap(imgUI, coords, prevStoredVal, newVal))
-            !=  prevStoredVal) {
+    // spinlock until image write succeeds
+    while((current = imageAtomicCompSwap(img, coords, prev, newVal))
+            !=  prev) {
 
-        prevStoredVal = curStoredVal;
-        vec4 rval = convRGBA8ToVec4(curStoredVal);
+        prev = current;
+        vec4 rval = getVoxelData(current);
 
         rval.xyz = rval.xyz * rval.w;
-        rval.xyz += val.xyz;
+        rval.xyz += data.xyz;
+        // use alpha channel for accumulator
         rval.w += 1;
         rval.xyz /= rval.w;
 
-        newVal = convVec4ToRGBA8(rval);
+        newVal = calcVoxelData(rval);
 
     }
 }
@@ -74,8 +75,6 @@ void main() {
         loc.z = int(gl_FragCoord.z * gridSize);
     }
 
-    imageAtomicRGBA8Avg(voxelColor, loc, texture(Texture0, tex));
-
-    imageAtomicRGBA8Avg(voxelNorm, loc, vec4(norm, 1));
-    //imageAtomicOr(voxelNorm, loc, convVec4ToRGBA8(vec4(norm, 1)));
+    storeVoxelData(voxelColor, loc, texture(Texture0, tex));
+    storeVoxelData(voxelNorm, loc, vec4(norm, 1));
 }

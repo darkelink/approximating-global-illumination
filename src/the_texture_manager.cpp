@@ -46,6 +46,7 @@ uint64_t TheTextureManager::Create_empty(std::vector<int> dimentions, GLenum for
             }
             glBindTexture(GL_TEXTURE_BUFFER, textureID);
             glTexBuffer(GL_TEXTURE_BUFFER, format, texBuffer);
+            break;
         case 2:
             glBindTexture(GL_TEXTURE_2D, textureID);
 
@@ -68,6 +69,7 @@ uint64_t TheTextureManager::Create_empty(std::vector<int> dimentions, GLenum for
             glTexImage3D(GL_TEXTURE_3D, 0, format,
                     dimentions[0], dimentions[1], dimentions[2], 0,
                     format, GL_UNSIGNED_BYTE, nullptr);
+            break;
     }
 
     return make_bindless(textureID);
