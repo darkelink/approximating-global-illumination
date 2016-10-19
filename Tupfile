@@ -1,7 +1,7 @@
 CC = g++
 LIBS += glfw3 glew
-CFLAGS += -Wall -std=c++11 `pkg-config --cflags $(LIBS)` -I lib -g
-LDFLAGS += `pkg-config --libs $(LIBS)`
+CFLAGS += -Wall -std=c++11 `pkg-config --cflags $(LIBS)` -I lib -O3
+LDFLAGS += `pkg-config --libs $(LIBS)` -O3
 TARGET = gi
 
 .gitignore

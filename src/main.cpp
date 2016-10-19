@@ -106,7 +106,7 @@ main(int argc, char* argv[]) {
         frameTime += deltaTime;
         ++frameCount;
         if (frameTime > 1) {
-            glfwSetWindowTitle(window, std::to_string(frameCount / frameTime).c_str());
+            glfwSetWindowTitle(window, std::to_string(frameTime / frameCount * 1000).c_str());
             frameTime = 0;
             frameCount = 0;
         }
